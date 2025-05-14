@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>冥想APP设计稿</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-12 text-primary-800">冥想APP设计稿</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
+            <!-- 欢迎页面 -->
+            <div class="relative">
+                <div class="w-[375px] h-[812px] border border-gray-200 rounded-[20px] overflow-hidden relative bg-white shadow-md">
+                    <div class="h-full flex flex-col items-center justify-center bg-gradient-to-b from-primary-50 to-white p-8">
+                        <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=500" 
+                             alt="Welcome" class="w-48 h-48 rounded-full mb-8 object-cover">
+                        <h1 class="text-3xl font-bold text-primary-800 mb-4">欢迎来到冥想</h1>
+                        <p class="text-gray-600 text-center mb-8">开启你的心灵之旅</p>
+                        <button class="w-full bg-primary-600 text-white py-3 rounded-full mb-4">开始体验</button>
+                        <button class="w-full border border-primary-600 text-primary-600 py-3 rounded-full">登录</button>
+                    </div>
+                </div>
+                <div class="absolute bottom-[-40px] left-0 right-0 text-center text-sm text-gray-600">欢迎页面</div>
+            </div>
+
+            <!-- 登录页面 -->
+            <div class="relative">
+                <div class="w-[375px] h-[812px] border border-gray-200 rounded-[20px] overflow-hidden relative bg-white shadow-md">
+                    <div class="h-full flex flex-col p-8">
+                        <div class="flex-1 flex flex-col justify-center">
+                            <h1 class="text-3xl font-bold text-primary-800 mb-8 text-center">登录</h1>
+                            <div class="space-y-4">
+                                <input type="text" placeholder="手机号/邮箱" 
+                                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+                                <input type="password" placeholder="密码" 
+                                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+                                <button class="w-full bg-primary-600 text-white py-3 rounded-lg">登录</button>
+                                <div class="flex justify-between text-sm text-gray-600">
+                                    <a href="#" class="text-primary-600">忘记密码？</a>
+                                    <a href="#" class="text-primary-600">注册账号</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute bottom-[-40px] left-0 right-0 text-center text-sm text-gray-600">登录页面</div>
+            </div>
+
+            <!-- 注册页面 -->
+            <div class="relative">
+                <div class="w-[375px] h-[812px] border border-gray-200 rounded-[20px] overflow-hidden relative bg-white shadow-md">
+                    <div class="h-full flex flex-col p-8">
+                        <div class="flex-1 flex flex-col justify-center">
+                            <h1 class="text-3xl font-bold text-primary-800 mb-8 text-center">注册</h1>
+                            <div class="space-y-4">
+                                <input type="text" placeholder="手机号/邮箱" 
+                                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+                                <input type="password" placeholder="设置密码" 
+                                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+                                <input type="password" placeholder="确认密码" 
+                                       class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+                                <button class="w-full bg-primary-600 text-white py-3 rounded-lg">注册</button>
+                                <div class="text-center text-sm text-gray-600">
+                                    已有账号？<a href="#" class="text-primary-600">立即登录</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute bottom-[-40px] left-0 right-0 text-center text-sm text-gray-600">注册页面</div>
+            </div>
+
+            <!-- 引导问卷页面 -->
+            <div class="relative">
+                <div class="w-[375px] h-[812px] border border-gray-200 rounded-[20px] overflow-hidden relative bg-white shadow-md">
+                    <div class="h-full flex flex-col p-8">
+                        <div class="flex-1 flex flex-col justify-center">
+                            <h1 class="text-2xl font-bold text-primary-800 mb-6 text-center">让我们了解你</h1>
+                            <p class="text-gray-600 text-center mb-8">这将帮助我们为你推荐合适的冥想课程</p>
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-gray-700 mb-2">你的冥想经验？</label>
+                                    <select class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+                                        <option>完全新手</option>
+                                        <option>有一些经验</option>
+                                        <option>经验丰富</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2">每天可以投入的时间？</label>
+                                    <select class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+                                        <option>5-10分钟</option>
+                                        <option>10-20分钟</option>
+                                        <option>20分钟以上</option>
+                                    </select>
+                                </div>
+                                <button class="w-full bg-primary-600 text-white py-3 rounded-lg mt-8">下一步</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute bottom-[-40px] left-0 right-0 text-center text-sm text-gray-600">引导问卷页面</div>
+            </div>
+
+            <!-- 首页 -->
+            <div class="relative">
+                <div class="w-[375px] h-[812px] border border-gray-200 rounded-[20px] overflow-hidden relative bg-white shadow-md">
+                    <div class="h-full flex flex-col">
+                        <div class="p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <h1 class="text-2xl font-bold text-primary-800">你好，小明</h1>
+                                <div class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+                                    <span class="text-primary-600">👋</span>
+                                </div>
+                            </div>
+                            <div class="bg-primary-50 rounded-2xl p-4 mb-6">
+                                <h2 class="text-lg font-semibold text-primary-800 mb-2">今日推荐</h2>
+                                <div class="flex items-center space-x-4">
+                                    <img src="https://images.unsplash.com/photo-1508672019048-805c876b67e2?w=500" 
+                                         alt="Meditation" class="w-20 h-20 rounded-xl object-cover">
+                                    <div>
+                                        <h3 class="font-medium text-primary-900">晨间唤醒</h3>
+                                        <p class="text-sm text-primary-600">10分钟 · 初级</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <h2 class="text-lg font-semibold text-primary-800">继续学习</h2>
+                                <div class="flex space-x-4 overflow-x-auto pb-4">
+                                    <div class="flex-shrink-0 w-40">
+                                        <img src="https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?w=500" 
+                                             alt="Course" class="w-full h-24 rounded-xl object-cover mb-2">
+                                        <h3 class="font-medium text-primary-900">专注力训练</h3>
+                                        <p class="text-sm text-primary-600">第3课</p>
+                                    </div>
+                                    <div class="flex-shrink-0 w-40">
+                                        <img src="https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?w=500" 
+                                             alt="Course" class="w-full h-24 rounded-xl object-cover mb-2">
+                                        <h3 class="font-medium text-primary-900">减压放松</h3>
+                                        <p class="text-sm text-primary-600">第2课</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-auto border-t border-gray-200">
+                            <div class="flex justify-around py-4">
+                                <a href="#" class="text-primary-600">
+                                    <span class="block text-center text-2xl">🏠</span>
+                                    <span class="text-xs">首页</span>
+                                </a>
+                                <a href="#" class="text-gray-400">
+                                    <span class="block text-center text-2xl">📚</span>
+                                    <span class="text-xs">课程</span>
+                                </a>
+                                <a href="#" class="text-gray-400">
+                                    <span class="block text-center text-2xl">📊</span>
+                                    <span class="text-xs">统计</span>
+                                </a>
+                                <a href="#" class="text-gray-400">
+                                    <span class="block text-center text-2xl">👤</span>
+                                    <span class="text-xs">我的</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute bottom-[-40px] left-0 right-0 text-center text-sm text-gray-600">首页</div>
+            </div>
+
+            <!-- 课程页面 -->
+            <div class="relative">
+                <div class="w-[375px] h-[812px] border border-gray-200 rounded-[20px] overflow-hidden relative bg-white shadow-md">
+                    <div class="h-full flex flex-col">
+                        <div class="p-6">
+                            <h1 class="text-2xl font-bold text-primary-800 mb-6">课程</h1>
+                            <div class="flex space-x-4 mb-6">
+                                <button class="px-4 py-2 bg-primary-600 text-white rounded-full text-sm">全部</button>
+                                <button class="px-4 py-2 bg-primary-50 text-primary-600 rounded-full text-sm">新手入门</button>
+                                <button class="px-4 py-2 bg-primary-50 text-primary-600 rounded-full text-sm">专注力</button>
+                                <button class="px-4 py-2 bg-primary-50 text-primary-600 rounded-full text-sm">减压</button>
+                            </div>
+                            <div class="space-y-6">
+                                <div class="bg-white rounded-2xl p-4 shadow-sm">
+                                    <img src="https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?w=500" 
+                                         alt="Course" class="w-full h-40 rounded-xl object-cover mb-4">
+                                    <h3 class="font-semibold text-primary-900 mb-2">冥想入门</h3>
+                                    <p class="text-sm text-gray-600 mb-2">适合初学者的基础冥想课程</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-primary-600">12课时 · 初级</span>
+                                        <button class="px-4 py-2 bg-primary-600 text-white rounded-full text-sm">开始</button>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-2xl p-4 shadow-sm">
+                                    <img src="https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?w=500" 
+                                         alt="Course" class="w-full h-40 rounded-xl object-cover mb-4">
+                                    <h3 class="font-semibold text-primary-900 mb-2">专注力训练</h3>
+                                    <p class="text-sm text-gray-600 mb-2">提升工作学习效率</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-primary-600">8课时 · 中级</span>
+                                        <button class="px-4 py-2 bg-primary-600 text-white rounded-full text-sm">开始</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-auto border-t border-gray-200">
+                            <div class="flex justify-around py-4">
+                                <a href="#" class="text-gray-400">
+                                    <span class="block text-center text-2xl">🏠</span>
+                                    <span class="text-xs">首页</span>
+                                </a>
+                                <a href="#" class="text-primary-600">
+                                    <span class="block text-center text-2xl">📚</span>
+                                    <span class="text-xs">课程</span>
+                                </a>
+                                <a href="#" class="text-gray-400">
+                                    <span class="block text-center text-2xl">📊</span>
+                                    <span class="text-xs">统计</span>
+                                </a>
+                                <a href="#" class="text-gray-400">
+                                    <span class="block text-center text-2xl">👤</span>
+                                    <span class="text-xs">我的</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute bottom-[-40px] left-0 right-0 text-center text-sm text-gray-600">课程页面</div>
+            </div>
+
+            <!-- 冥想播放器页面 -->
+            <div class="relative">
+                <div class="w-[375px] h-[812px] border border-gray-200 rounded-[20px] overflow-hidden relative bg-white shadow-md">
+                    <div class="h-full flex flex-col bg-gradient-to-b from-primary-900 to-primary-800 text-white">
+                        <div class="p-6">
+                            <button class="text-white mb-8">← 返回</button>
+                            <div class="text-center mb-12">
+                                <h1 class="text-2xl font-bold mb-2">晨间唤醒</h1>
+                                <p class="text-primary-200">10分钟 · 初级</p>
+                            </div>
+                            <div class="flex justify-center mb-12">
+                                <img src="https://images.unsplash.com/photo-1508672019048-805c876b67e2?w=500" 
+                                     alt="Meditation" class="w-64 h-64 rounded-full object-cover">
+                            </div>
+                            <div class="flex justify-center items-center space-x-8 mb-8">
+                                <button class="text-4xl">⏮</button>
+                                <button class="w-16 h-16 bg-white rounded-full flex items-center justify-center">
+                                    <span class="text-3xl text-primary-800">▶</span>
+                                </button>
+                                <button class="text-4xl">⏭</button>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span>00:00</span>
+                                    <span>10:00</span>
+                                </div>
+                                <div class="h-1 bg-primary-700 rounded-full">
+                                    <div class="h-full w-1/3 bg-white rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute bottom-[-40px] left-0 right-0 text-center text-sm text-gray-600">冥想播放器页面</div>
+            </div>
+
+            <!-- 课程详情页面 -->
+            <div class="relative">
+                <div class="w-[375px] h-[812px] border border-gray-200 rounded-[20px] overflow-hidden relative bg-white shadow-md">
+                    <div class="h-full flex flex-col">
+                        <div class="relative">
+                            <img src="https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?w=500" 
+                                 alt="Course" class="w-full h-48 object-cover">
+                            <button class="absolute top-4 left-4 text-white bg-black bg-opacity-30 rounded-full p-2">←</button>
+                        </div>
+                        <div class="p-6">
+                            <h1 class="text-2xl font-bold text-primary-800 mb-2">冥想入门</h1>
+                            <p class="text-gray-600 mb-4">适合初学者的基础冥想课程</p>
+                            <div class="flex items-center space-x-4 mb-6">
+                                <span class="text-sm text-primary-600">12课时</span>
+                                <span class="text-sm text-primary-600">初级</span>
+                                <span class="text-sm text-primary-600">4.9分</span>
+                            </div>
+                            <div class="space-y-4">
+                                <h2 class="font-semibold text-primary-800">课程内容</h2>
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between p-3 bg-primary-50 rounded-lg">
+                                        <div>
+                                            <h3 class="font-medium text-primary-900">第1课：认识冥想</h3>
+                                            <p class="text-sm text-primary-600">10分钟</p>
+                                        </div>
+                                        <button class="px-4 py-2 bg-primary-600 text-white rounded-full text-sm">开始</button>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-primary-50 rounded-lg">
+                                        <div>
+                                            <h3 class="font-medium text-primary-900">第2课：呼吸练习</h3>
+                                            <p class="text-sm text-primary-600">15分钟</p>
+                                        </div>
+                                        <button class="px-4 py-2 bg-primary-600 text-white rounded-full text-sm">开始</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute bottom-[-40px] left-0 right-0 text-center text-sm text-gray-600">课程详情页面</div>
+            </div>
+
+            <!-- 统计页面 -->
+            <div class="relative">
+                <div class="w-[375px] h-[812px] border border-gray-200 rounded-[20px] overflow-hidden relative bg-white shadow-md">
+                    <div class="h-full flex flex-col">
+                        <div class="p-6">
+                            <h1 class="text-2xl font-bold text-primary-800 mb-6">统计</h1>
+                            <div class="grid grid-cols-2 gap-4 mb-8">
+                                <div class="bg-primary-50 rounded-2xl p-4">
+                                    <h3 class="text-sm text-primary-600 mb-1">本周冥想</h3>
+                                    <p class="text-2xl font-bold text-primary-800">5次</p>
+                                </div>
+                                <div class="bg-primary-50 rounded-2xl p-4">
+                                    <h3 class="text-sm text-primary-600 mb-1">总时长</h3>
+                                    <p class="text-2xl font-bold text-primary-800">2.5小时</p>
+                                </div>
+                            </div>
+                            <div class="space-y-6">
+                                <div>
+                                    <h2 class="font-semibold text-primary-800 mb-4">每周进度</h2>
+                                    <div class="h-40 bg-primary-50 rounded-2xl p-4">
+                                        <div class="h-full flex items-end justify-between">
+                                            <div class="w-8 bg-primary-600 rounded-t-lg" style="height: 60%"></div>
+                                            <div class="w-8 bg-primary-600 rounded-t-lg" style="height: 80%"></div>
+                                            <div class="w-8 bg-primary-600 rounded-t-lg" style="height: 40%"></div>
+                                            <div class="w-8 bg-primary-600 rounded-t-lg" style="height: 70%"></div>
+                                            <div class="w-8 bg-primary-600 rounded-t-lg" style="height: 90%"></div>
+                                            <div class="w-8 bg-primary-600 rounded-t-lg" style="height: 50%"></div>
+                                            <div class="w-8 bg-primary-600 rounded-t-lg" style="height: 30%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h2 class="font-semibold text-primary-800 mb-4">成就</h2>
+                                    <div class="grid grid-cols-3 gap-4">
+                                        <div class="text-center">
+                                            <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <span class="text-2xl">🎯</span>
+                                            </div>
+                                            <p class="text-sm text-primary-600">连续7天</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <span class="text-2xl">⏱</span>
+                                            </div>
+                                            <p class="text-sm text-primary-600">总时长10h</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <span class="text-2xl">📚</span>
+                                            </div>
+                                            <p class="text-sm text-primary-600">完成课程</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-auto border-t border-gray-200">
+                            <div class="flex justify-around py-4">
+                                <a href="#" class="text-gray-400">
+                                    <span class="block text-center text-2xl">🏠</span>
+                                    <span class="text-xs">首页</span>
+                                </a>
+                                <a href="#" class="text-gray-400">
+                                    <span class="block text-center text-2xl">📚</span>
+                                    <span class="text-xs">课程</span>
+                                </a>
+                                <a href="#" class="text-primary-600">
+                                    <span class="block text-center text-2xl">📊</span>
+                                    <span class="text-xs">统计</span>
+                                </a>
+                                <a href="#" class="text-gray-400">
+                                    <span class="block text-center text-2xl">👤</span>
+                                    <span class="text-xs">我的</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute bottom-[-40px] left-0 right-0 text-center text-sm text-gray-600">统计页面</div>
+            </div>
+
+            <!-- 个人页面 -->
+            <div class="relative">
+                <div class="w-[375px] h-[812px] border border-gray-200 rounded-[20px] overflow-hidden relative bg-white shadow-md">
+                    <div class="h-full flex flex-col">
+                        <div class="p-6">
+                            <div class="flex items-center space-x-4 mb-8">
+                                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=500" 
+                                     alt="Avatar" class="w-20 h-20 rounded-full object-cover">
+                                <div>
+                                    <h1 class="text-xl font-bold text-primary-800">小明</h1>
+                                    <p class="text-gray-600">冥想爱好者</p>
+                                </div>
+                            </div>
+                            <div class="space-y-6">
+                                <div class="bg-primary-50 rounded-2xl p-4">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h2 class="font-semibold text-primary-800">我的成就</h2>
+                                        <a href="#" class="text-primary-600 text-sm">查看全部</a>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-4">
+                                        <div class="text-center">
+                                            <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <span class="text-xl">🎯</span>
+                                            </div>
+                                            <p class="text-xs text-primary-600">连续7天</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <span class="text-xl">⏱</span>
+                                            </div>
+                                            <p class="text-xs text-primary-600">总时长10h</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <span class="text-xl">📚</span>
+                                            </div>
+                                            <p class="text-xs text-primary-600">完成课程</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-y-4">
+                                    <a href="#" class="flex items-center justify-between p-4 bg-white rounded-xl">
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-2xl">📝</span>
+                                            <span class="text-primary-800">冥想记录</span>
+                                        </div>
+                                        <span class="text-gray-400">></span>
+                                    </a>
+                                    <a href="#" class="flex items-center justify-between p-4 bg-white rounded-xl">
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-2xl">⭐</span>
+                                            <span class="text-primary-800">我的收藏</span>
+                                        </div>
+                                        <span class="text-gray-400">></span>
+                                    </a>
+                                    <a href="#" class="flex items-center justify-between p-4 bg-white rounded-xl">
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-2xl">⚙️</span>
+                                            <span class="text-primary-800">设置</span>
+                                        </div>
+                                        <span class="text-gray-400">></span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-auto border-t border-gray-200">
+                            <div class="flex justify-around py-4">
+                                <a href="#" class="text-gray-400">
+                                    <span class="block text-center text-2xl">🏠</span>
+                                    <span class="text-xs">首页</span>
+                                </a>
+                                <a href="#" class="text-gray-400">
+                                    <span class="block text-center text-2xl">📚</span>
+                                    <span class="text-xs">课程</span>
+                                </a>
+                                <a href="#" class="text-gray-400">
+                                    <span class="block text-center text-2xl">📊</span>
+                                    <span class="text-xs">统计</span>
+                                </a>
+                                <a href="#" class="text-primary-600">
+                                    <span class="block text-center text-2xl">👤</span>
+                                    <span class="text-xs">我的</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute bottom-[-40px] left-0 right-0 text-center text-sm text-gray-600">个人页面</div>
+            </div>
+
+            <!-- 设置页面 -->
+            <div class="relative">
+                <div class="w-[375px] h-[812px] border border-gray-200 rounded-[20px] overflow-hidden relative bg-white shadow-md">
+                    <div class="h-full flex flex-col">
+                        <div class="p-6">
+                            <div class="flex items-center mb-8">
+                                <button class="text-primary-800 mr-4">←</button>
+                                <h1 class="text-2xl font-bold text-primary-800">设置</h1>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="bg-white rounded-xl p-4">
+                                    <h2 class="font-semibold text-primary-800 mb-4">通知设置</h2>
+                                    <div class="space-y-4">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-700">每日提醒</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" class="sr-only peer" checked>
+                                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                                            </label>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-700">课程更新提醒</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" class="sr-only peer" checked>
+                                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-xl p-4">
+                                    <h2 class="font-semibold text-primary-800 mb-4">账号设置</h2>
+                                    <div class="space-y-4">
+                                        <a href="#" class="flex items-center justify-between">
+                                            <span class="text-gray-700">修改密码</span>
+                                            <span class="text-gray-400">></span>
+                                        </a>
+                                        <a href="#" class="flex items-center justify-between">
+                                            <span class="text-gray-700">隐私设置</span>
+                                            <span class="text-gray-400">></span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <button class="w-full py-3 text-red-600 border border-red-600 rounded-xl">退出登录</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute bottom-[-40px] left-0 right-0 text-center text-sm text-gray-600">设置页面</div>
+            </div>
+
+            <!-- 冥想记录页面 -->
+            <div class="relative">
+                <div class="w-[375px] h-[812px] border border-gray-200 rounded-[20px] overflow-hidden relative bg-white shadow-md">
+                    <div class="h-full flex flex-col">
+                        <div class="p-6">
+                            <div class="flex items-center mb-8">
+                                <button class="text-primary-800 mr-4">←</button>
+                                <h1 class="text-2xl font-bold text-primary-800">冥想记录</h1>
+                            </div>
+                            <div class="space-y-6">
+                                <div class="bg-primary-50 rounded-2xl p-4">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h2 class="font-semibold text-primary-800">本周统计</h2>
+                                        <span class="text-sm text-primary-600">5次冥想</span>
+                                    </div>
+                                    <div class="h-32 bg-white rounded-xl p-4">
+                                        <div class="h-full flex items-end justify-between">
+                                            <div class="w-8 bg-primary-600 rounded-t-lg" style="height: 60%"></div>
+                                            <div class="w-8 bg-primary-600 rounded-t-lg" style="height: 80%"></div>
+                                            <div class="w-8 bg-primary-600 rounded-t-lg" style="height: 40%"></div>
+                                            <div class="w-8 bg-primary-600 rounded-t-lg" style="height: 70%"></div>
+                                            <div class="w-8 bg-primary-600 rounded-t-lg" style="height: 90%"></div>
+                                            <div class="w-8 bg-primary-600 rounded-t-lg" style="height: 50%"></div>
+                                            <div class="w-8 bg-primary-600 rounded-t-lg" style="height: 30%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-y-4">
+                                    <h2 class="font-semibold text-primary-800">历史记录</h2>
+                                    <div class="space-y-4">
+                                        <div class="bg-white rounded-xl p-4">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <h3 class="font-medium text-primary-900">晨间唤醒</h3>
+                                                <span class="text-sm text-primary-600">10分钟</span>
+                                            </div>
+                                            <p class="text-sm text-gray-600">2024-03-20 08:30</p>
+                                        </div>
+                                        <div class="bg-white rounded-xl p-4">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <h3 class="font-medium text-primary-900">专注力训练</h3>
+                                                <span class="text-sm text-primary-600">15分钟</span>
+                                            </div>
+                                            <p class="text-sm text-gray-600">2024-03-19 20:00</p>
+                                        </div>
+                                        <div class="bg-white rounded-xl p-4">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <h3 class="font-medium text-primary-900">减压放松</h3>
+                                                <span class="text-sm text-primary-600">20分钟</span>
+                                            </div>
+                                            <p class="text-sm text-gray-600">2024-03-18 21:15</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute bottom-[-40px] left-0 right-0 text-center text-sm text-gray-600">冥想记录页面</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
