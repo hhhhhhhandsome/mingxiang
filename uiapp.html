@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>静心 - 冥想APP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            light: '#a78bfa',
+                            DEFAULT: '#8b5cf6',
+                            dark: '#7c3aed',
+                        },
+                        secondary: {
+                            light: '#c4b5fd',
+                            DEFAULT: '#a78bfa',
+                            dark: '#8b5cf6',
+                        },
+                        background: {
+                            light: '#f5f3ff',
+                            DEFAULT: '#ede9fe',
+                            dark: '#ddd6fe',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .page {
+            display: none;
+        }
+        .active-page {
+            display: block;
+        }
+        .page-transition {
+            transition: all 0.3s ease-in-out;
+        }
+        
+        /* 音频播放器自定义样式 */
+        .audio-player-progress {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: #ddd6fe;
+            border-radius: 10px;
+            width: 100%;
+        }
+        
+        .audio-player-progress::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #8b5cf6;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+    <div id="app" class="max-w-md mx-auto bg-white min-h-screen relative">
+        <!-- 页面容器 - 所有页面将在这里切换 -->
+        <div id="pages-container" class="transition-opacity duration-300">
+            <!-- 页面内容将在这里动态加载 -->
+        </div>
+    </div>
+
+    <script>
+        // 应用状态管理
+        const appState = {
+            currentPage: 'welcome',
+            user: null,
+            currentMeditation: null,
+            meditationHistory: [],
+            userPreferences: {
+                theme: 'light',
+                notificationsEnabled: true,
+                dailyReminder: true,
+                reminderTime: '21:00'
+            }
+        };
+
+        // 页面路由函数
+        function navigateTo(pageName) {
+            const pagesContainer = document.getElementById('pages-container');
+            
+            // 页面过渡动画
+            pagesContainer.classList.add('opacity-0');
+            
+            setTimeout(() => {
+                // 更新当前页面
+                appState.currentPage = pageName;
+                
+                // 渲染页面内容
+                renderCurrentPage();
+                
+                // 页面淡入
+                pagesContainer.classList.remove('opacity-0');
+            }, 300);
+        }
+
+        // 渲染欢迎页面
+        function renderWelcomePage() {
+            const pagesContainer = document.getElementById('pages-container');
+            pagesContainer.innerHTML = `
+                <div class="welcome-page min-h-screen flex flex-col">
+                    <div class="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                        <div class="welcome-image mb-8">
+                            <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" 
+                                 alt="冥想" 
+                                 class="w-56 h-56 rounded-full object-cover shadow-lg">
+                        </div>
+                        <h1 class="text-4xl font-bold text-primary-dark mb-2">静心</h1>
+                        <p class="text-lg text-gray-600 mb-8">找到内心的平静，开始你的冥想之旅</p>
+                        <div class="welcome-buttons w-full space-y-4">
+                            <button onclick="navigateTo('login')" class="w-full bg-primary hover:bg-primary-dark text-white py-3 px-6 rounded-lg shadow-md transition duration-300 text-lg font-medium">
+                                登录
+                            </button>
+                            <button onclick="navigateTo('register')" class="w-full bg-white border-2 border-primary text-primary hover:bg-background-light py-3 px-6 rounded-lg shadow-sm transition duration-300 text-lg font-medium">
+                                注册
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-4 text-center text-sm text-gray-500">
+                        继续使用即表示您同意我们的<a href="#" class="text-primary">服务条款</a>和<a href="#" class="text-primary">隐私政策</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 渲染登录页面
+        function renderLoginPage() {
+            const pagesContainer = document.getElementById('pages-container');
+            pagesContainer.innerHTML = `
+                <div class="login-page min-h-screen flex flex-col">
+                    <div class="p-4">
+                        <button onclick="navigateTo('welcome')" class="text-gray-600 hover:text-primary">
+                            <i class="fas fa-arrow-left"></i> 返回
+                        </button>
+                    </div>
+                    <div class="flex-1 flex flex-col justify-center p-6">
+                        <div class="mb-8 text-center">
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">欢迎回来</h1>
+                            <p class="text-gray-600">登录您的账户继续冥想之旅</p>
+                        </div>
+                        <form class="space-y-6" onsubmit="event.preventDefault(); navigateTo('home');">
+                            <div class="space-y-2">
+                                <label for="email" class="text-sm font-medium text-gray-700">邮箱地址</label>
+                                <input type="email" id="email" placeholder="your@email.com" required
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <label for="password" class="text-sm font-medium text-gray-700">密码</label>
+                                    <a href="#" class="text-sm text-primary hover:text-primary-dark">忘记密码?</a>
+                                </div>
+                                <input type="password" id="password" placeholder="••••••••" required
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                            <div class="pt-2">
+                                <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white py-3 px-6 rounded-lg shadow-md transition duration-300 text-lg font-medium">
+                                    登录
+                                </button>
+                            </div>
+                        </form>
+                        <div class="mt-8">
+                            <div class="relative">
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="w-full border-t border-gray-300"></div>
+                                </div>
+                                <div class="relative flex justify-center text-sm">
+                                    <span class="px-2 bg-white text-gray-500">或通过以下方式登录</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 grid grid-cols-3 gap-3">
+                                <button class="flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white hover:bg-gray-50">
+                                    <i class="fab fa-weixin text-green-600 text-xl"></i>
+                                </button>
+                                <button class="flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white hover:bg-gray-50">
+                                    <i class="fab fa-apple text-black text-xl"></i>
+                                </button>
+                                <button class="flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white hover:bg-gray-50">
+                                    <i class="fab fa-google text-red-500 text-xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 text-center">
+                        <p class="text-gray-600">
+                            还没有账户? <a href="#" onclick="navigateTo('register')" class="text-primary font-medium">立即注册</a>
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 渲染注册页面
+        function renderRegisterPage() {
+            const pagesContainer = document.getElementById('pages-container');
+            pagesContainer.innerHTML = `
+                <div class="register-page min-h-screen flex flex-col">
+                    <div class="p-4">
+                        <button onclick="navigateTo('welcome')" class="text-gray-600 hover:text-primary">
+                            <i class="fas fa-arrow-left"></i> 返回
+                        </button>
+                    </div>
+                    <div class="flex-1 flex flex-col justify-center p-6">
+                        <div class="mb-8 text-center">
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">创建账户</h1>
+                            <p class="text-gray-600">开始您的冥想之旅</p>
+                        </div>
+                        <form class="space-y-5" onsubmit="event.preventDefault(); navigateTo('onboarding');">
+                            <div class="space-y-2">
+                                <label for="name" class="text-sm font-medium text-gray-700">姓名</label>
+                                <input type="text" id="name" placeholder="您的姓名" required
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                            <div class="space-y-2">
+                                <label for="reg-email" class="text-sm font-medium text-gray-700">邮箱地址</label>
+                                <input type="email" id="reg-email" placeholder="your@email.com" required
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                            <div class="space-y-2">
+                                <label for="reg-password" class="text-sm font-medium text-gray-700">密码</label>
+                                <input type="password" id="reg-password" placeholder="至少8个字符" required
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+                            <div class="flex items-center">
+                                <input id="terms" name="terms" type="checkbox" required class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                <label for="terms" class="ml-2 block text-sm text-gray-600">
+                                    我同意<a href="#" class="text-primary">服务条款</a>和<a href="#" class="text-primary">隐私政策</a>
+                                </label>
+                            </div>
+                            <div class="pt-2">
+                                <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white py-3 px-6 rounded-lg shadow-md transition duration-300 text-lg font-medium">
+                                    注册
+                                </button>
+                            </div>
+                        </form>
+                        <div class="mt-8">
+                            <div class="relative">
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="w-full border-t border-gray-300"></div>
+                                </div>
+                                <div class="relative flex justify-center text-sm">
+                                    <span class="px-2 bg-white text-gray-500">或通过以下方式注册</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 grid grid-cols-3 gap-3">
+                                <button class="flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white hover:bg-gray-50">
+                                    <i class="fab fa-weixin text-green-600 text-xl"></i>
+                                </button>
+                                <button class="flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white hover:bg-gray-50">
+                                    <i class="fab fa-apple text-black text-xl"></i>
+                                </button>
+                                <button class="flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white hover:bg-gray-50">
+                                    <i class="fab fa-google text-red-500 text-xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 text-center">
+                        <p class="text-gray-600">
+                            已有账户? <a href="#" onclick="navigateTo('login')" class="text-primary font-medium">立即登录</a>
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 渲染引导问卷页面
+        function renderOnboardingPage() {
+            const pagesContainer = document.getElementById('pages-container');
+            pagesContainer.innerHTML = `
+                <div class="onboarding-page min-h-screen flex flex-col">
+                    <div class="p-6">
+                        <div class="w-full bg-gray-200 rounded-full h-2 mb-6">
+                            <div class="bg-primary h-2 rounded-full" style="width: 25%"></div>
+                        </div>
+                        <h1 class="text-2xl font-bold text-gray-800 mb-1">告诉我们更多关于您自己</h1>
+                        <p class="text-gray-600 mb-6">这将帮助我们为您定制最佳的冥想体验</p>
+                        
+                        <div class="space-y-6">
+                            <div class="space-y-4">
+                                <h2 class="text-lg font-semibold text-gray-800">您的冥想经验如何?</h2>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <button class="p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-background-light text-center transition duration-200">
+                                        <span class="block text-sm mb-1">新手</span>
+                                        <span class="block text-3xl">🌱</span>
+                                    </button>
+                                    <button class="p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-background-light text-center transition duration-200">
+                                        <span class="block text-sm mb-1">有些经验</span>
+                                        <span class="block text-3xl">🌿</span>
+                                    </button>
+                                    <button class="p-4 border-2 border-primary bg-background-light rounded-lg text-center transition duration-200">
+                                        <span class="block text-sm mb-1">经验丰富</span>
+                                        <span class="block text-3xl">🌳</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <h2 class="text-lg font-semibold text-gray-800">您每周想要冥想多少天?</h2>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <button class="p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-background-light text-center transition duration-200">
+                                        <span class="block">1-2 天</span>
+                                    </button>
+                                    <button class="p-4 border-2 border-primary bg-background-light rounded-lg text-center transition duration-200">
+                                        <span class="block">3-5 天</span>
+                                    </button>
+                                    <button class="p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-background-light text-center transition duration-200">
+                                        <span class="block">每天</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <h2 class="text-lg font-semibold text-gray-800">您希望改善哪些方面?</h2>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button class="p-4 border-2 border-primary bg-background-light rounded-lg text-left transition duration-200">
+                                        <span class="flex items-center"><i class="fas fa-check-circle text-primary mr-2"></i> 减轻压力</span>
+                                    </button>
+                                    <button class="p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-background-light text-left transition duration-200">
+                                        <span class="flex items-center"><i class="far fa-circle text-gray-400 mr-2"></i> 改善睡眠</span>
+                                    </button>
+                                    <button class="p-4 border-2 border-primary bg-background-light rounded-lg text-left transition duration-200">
+                                        <span class="flex items-center"><i class="fas fa-check-circle text-primary mr-2"></i> 提高专注力</span>
+                                    </button>
+                                    <button class="p-4 border-2 border-primary bg-background-light rounded-lg text-left transition duration-200">
+                                        <span class="flex items-center"><i class="fas fa-check-circle text-primary mr-2"></i> 增强幸福感</span>
+                                    </button>
+                                    <button class="p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-background-light text-left transition duration-200">
+                                        <span class="flex items-center"><i class="far fa-circle text-gray-400 mr-2"></i> 提升自我意识</span>
+                                    </button>
+                                    <button class="p-4 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-background-light text-left transition duration-200">
+                                        <span class="flex items-center"><i class="far fa-circle text-gray-400 mr-2"></i> 其他目标</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="pt-8 flex justify-between">
+                            <button onclick="navigateTo('register')" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition duration-200">
+                                上一步
+                            </button>
+                            <button onclick="navigateTo('home')" class="px-6 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg shadow-md transition duration-200">
+                                完成
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 渲染当前页面
+        function renderCurrentPage() {
+            const pagesContainer = document.getElementById('pages-container');
+            pagesContainer.innerHTML = '';
+            
+            // 根据当前页面状态渲染对应页面
+            switch(appState.currentPage) {
+                case 'welcome':
+                    renderWelcomePage();
+                    break;
+                case 'login':
+                    renderLoginPage();
+                    break;
+                case 'register':
+                    renderRegisterPage();
+                    break;
+                case 'onboarding':
+                    renderOnboardingPage();
+                    break;
+                case 'home':
+                    renderHomePage();
+                    break;
+                case 'courses':
+                    renderCoursesPage();
+                    break;
+                case 'meditation-player':
+                    renderMeditationPlayerPage();
+                    break;
+                case 'course-detail':
+                    renderCourseDetailPage();
+                    break;
+                case 'stats':
+                    renderStatsPage();
+                    break;
+                case 'profile':
+                    renderProfilePage();
+                    break;
+                case 'settings':
+                    renderSettingsPage();
+                    break;
+                case 'history':
+                    renderHistoryPage();
+                    break;
+                default:
+                    renderWelcomePage();
+            }
+        }
+        
+        // 渲染主页
+        function renderHomePage() {
+            const pagesContainer = document.getElementById('pages-container');
+            
+            // 模拟用户数据
+            const user = {
+                name: '李明',
+                streak: 7,
+                totalMinutes: 328
+            };
+            
+            // 模拟推荐冥想课程
+            const recommendedCourses = [
+                { id: 1, title: '晨间唤醒', duration: '10分钟', image: 'https://images.unsplash.com/photo-1477332552946-cfb384aeaf1c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60' },
+                { id: 2, title: '专注力提升', duration: '15分钟', image: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60' },
+                { id: 3, title: '深度放松', duration: '20分钟', image: 'https://images.unsplash.com/photo-1515614466515-e512e497a047?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60' }
+            ];
+            
+            // 模拟常规数据
+            const dailyRecommendation = {
+                title: '今日推荐: 安宁之境',
+                description: '让平静与安宁洗净一天的疲惫，帮助您放松身心',
+                duration: '15分钟',
+                image: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60'
+            };
+            
+            pagesContainer.innerHTML = `
+                <div class="home-page pb-16">
+                    <!-- 顶部欢迎区域 -->
+                    <div class="p-6 bg-gradient-to-r from-primary to-secondary-dark text-white rounded-b-3xl">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <h1 class="text-xl font-semibold">嗨，${user.name}</h1>
+                                <p class="text-secondary-light">祝您有个美好的一天</p>
+                            </div>
+                            <div class="flex items-center">
+                                <button class="mr-2 w-10 h-10 flex items-center justify-center rounded-full bg-white bg-opacity-20 text-white">
+                                    <i class="fas fa-bell"></i>
+                                </button>
+                                <button onclick="navigateTo('profile')" class="w-10 h-10 rounded-full overflow-hidden border-2 border-white">
+                                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" 
+                                         alt="Profile" class="w-full h-full object-cover">
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white bg-opacity-20 p-4 rounded-xl">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mr-3">
+                                        <i class="fas fa-fire text-primary text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h2 class="font-semibold">连续${user.streak}天</h2>
+                                        <p class="text-sm text-secondary-light">继续保持！</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <h2 class="font-semibold">${user.totalMinutes}分钟</h2>
+                                    <p class="text-sm text-secondary-light">总冥想时间</p>
+                                </div>
+                            </div>
+                            
+                            <button onclick="navigateTo('stats')" class="w-full bg-white text-primary font-medium py-2 rounded-lg">
+                                查看详细统计
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 每日推荐 -->
+                    <div class="p-6">
+                        <h2 class="text-xl font-semibold mb-4">今日推荐</h2>
+                        <div class="relative rounded-xl overflow-hidden shadow-md" onclick="navigateTo('meditation-player')">
+                            <img src="${dailyRecommendation.image}" alt="${dailyRecommendation.title}" class="w-full h-48 object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-4 text-white">
+                                <h3 class="font-semibold text-lg">${dailyRecommendation.title}</h3>
+                                <p class="text-sm opacity-90 mb-2">${dailyRecommendation.description}</p>
+                                <div class="flex items-center">
+                                    <span class="bg-white/30 px-3 py-1 rounded-full text-xs">
+                                        ${dailyRecommendation.duration}
+                                    </span>
+                                    <button class="ml-auto bg-white text-primary w-10 h-10 rounded-full flex items-center justify-center shadow-lg">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 推荐课程 -->
+                    <div class="px-6 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-semibold">为您推荐</h2>
+                            <button onclick="navigateTo('courses')" class="text-primary text-sm font-medium">
+                                查看全部
+                            </button>
+                        </div>
+                        
+                        <div class="flex overflow-x-auto pb-2 -mx-2 scrollbar-hide">
+                            ${recommendedCourses.map(course => `
+                                <div class="px-2 w-2/3 flex-shrink-0" onclick="navigateTo('course-detail')">
+                                    <div class="rounded-xl overflow-hidden shadow-md">
+                                        <img src="${course.image}" alt="${course.title}" class="w-full h-32 object-cover">
+                                        <div class="p-3">
+                                            <h3 class="font-medium">${course.title}</h3>
+                                            <p class="text-sm text-gray-500">${course.duration}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- 快速冥想 -->
+                    <div class="px-6 mb-8">
+                        <h2 class="text-xl font-semibold mb-4">快速冥想</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button onclick="navigateTo('meditation-player')" class="bg-background-light p-4 rounded-xl flex flex-col items-center text-center">
+                                <div class="w-12 h-12 bg-secondary rounded-full flex items-center justify-center mb-2 text-white">
+                                    <i class="fas fa-moon"></i>
+                                </div>
+                                <h3 class="font-medium">睡前放松</h3>
+                                <p class="text-xs text-gray-500">10分钟</p>
+                            </button>
+                            <button onclick="navigateTo('meditation-player')" class="bg-background-light p-4 rounded-xl flex flex-col items-center text-center">
+                                <div class="w-12 h-12 bg-secondary rounded-full flex items-center justify-center mb-2 text-white">
+                                    <i class="fas fa-sun"></i>
+                                </div>
+                                <h3 class="font-medium">晨间唤醒</h3>
+                                <p class="text-xs text-gray-500">5分钟</p>
+                            </button>
+                            <button onclick="navigateTo('meditation-player')" class="bg-background-light p-4 rounded-xl flex flex-col items-center text-center">
+                                <div class="w-12 h-12 bg-secondary rounded-full flex items-center justify-center mb-2 text-white">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <h3 class="font-medium">慈心冥想</h3>
+                                <p class="text-xs text-gray-500">15分钟</p>
+                            </button>
+                            <button onclick="navigateTo('meditation-player')" class="bg-background-light p-4 rounded-xl flex flex-col items-center text-center">
+                                <div class="w-12 h-12 bg-secondary rounded-full flex items-center justify-center mb-2 text-white">
+                                    <i class="fas fa-brain"></i>
+                                </div>
+                                <h3 class="font-medium">专注力训练</h3>
+                                <p class="text-xs text-gray-500">10分钟</p>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 底部导航栏 -->
+                    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 px-6 max-w-md mx-auto">
+                        <button onclick="navigateTo('home')" class="flex flex-col items-center text-primary">
+                            <i class="fas fa-home text-xl"></i>
+                            <span class="text-xs mt-1">首页</span>
+                        </button>
+                        <button onclick="navigateTo('courses')" class="flex flex-col items-center text-gray-500">
+                            <i class="fas fa-book text-xl"></i>
+                            <span class="text-xs mt-1">课程</span>
+                        </button>
+                        <button onclick="navigateTo('meditation-player')" class="flex flex-col items-center text-gray-500">
+                            <div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white -mt-5">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <span class="text-xs mt-1">冥想</span>
+                        </button>
+                        <button onclick="navigateTo('stats')" class="flex flex-col items-center text-gray-500">
+                            <i class="fas fa-chart-bar text-xl"></i>
+                            <span class="text-xs mt-1">统计</span>
+                        </button>
+                        <button onclick="navigateTo('profile')" class="flex flex-col items-center text-gray-500">
+                            <i class="fas fa-user text-xl"></i>
+                            <span class="text-xs mt-1">我的</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 渲染课程页面
+        function renderCoursesPage() {
+            const pagesContainer = document.getElementById('pages-container');
+            
+            // 模拟课程类别
+            const categories = [
+                '所有课程', '初学者', '减压', '睡眠', '专注力', '情绪管理'
+            ];
+            
+            // 模拟课程数据
+            const courses = [
+                { 
+                    id: 1, 
+                    title: '7天冥想入门', 
+                    description: '适合初学者的7天指导冥想课程',
+                    lessons: 7,
+                    duration: '每天10分钟',
+                    category: '初学者',
+                    image: 'https://images.unsplash.com/photo-1474418397713-b172f2778530?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60' 
+                },
+                { 
+                    id: 2, 
+                    title: '深度睡眠冥想', 
+                    description: '帮助您快速入睡并获得高质量的睡眠',
+                    lessons: 5,
+                    duration: '每天20分钟',
+                    category: '睡眠',
+                    image: 'https://images.unsplash.com/photo-1455203168698-9d67426e1739?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60' 
+                },
+                { 
+                    id: 3, 
+                    title: '工作专注力提升', 
+                    description: '提高工作和学习中的专注力和效率',
+                    lessons: 10,
+                    duration: '每天15分钟',
+                    category: '专注力',
+                    image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60' 
+                },
+                { 
+                    id: 4, 
+                    title: '压力管理冥想', 
+                    description: '学习如何应对日常压力和焦虑',
+                    lessons: 8,
+                    duration: '每天15分钟',
+                    category: '减压',
+                    image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60' 
+                },
+                { 
+                    id: 5, 
+                    title: '情绪平衡冥想', 
+                    description: '培养情绪平衡和稳定的内心状态',
+                    lessons: 6,
+                    duration: '每天20分钟',
+                    category: '情绪管理',
+                    image: 'https://images.unsplash.com/photo-1515023115689-589c33041d3c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60' 
+                },
+                { 
+                    id: 6, 
+                    title: '身体扫描冥想', 
+                    description: '增强身体意识和放松全身肌肉',
+                    lessons: 4,
+                    duration: '每天15分钟',
+                    category: '减压',
+                    image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60' 
+                }
+            ];
+            
+            pagesContainer.innerHTML = `
+                <div class="courses-page pb-16">
+                    <!-- 顶部标题栏 -->
+                    <div class="sticky top-0 z-10 bg-white px-6 py-4 border-b border-gray-200">
+                        <h1 class="text-2xl font-bold text-gray-800">冥想课程</h1>
+                    </div>
+                    
+                    <!-- 搜索栏 -->
+                    <div class="px-6 py-4">
+                        <div class="relative">
+                            <input type="text" placeholder="搜索冥想课程..." class="w-full bg-gray-100 rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- 分类标签 -->
+                    <div class="px-6 mb-4">
+                        <div class="flex overflow-x-auto pb-2 -mx-1 scrollbar-hide">
+                            ${categories.map((category, index) => `
+                                <button class="px-4 py-2 mx-1 rounded-full text-sm whitespace-nowrap ${index === 0 ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}">
+                                    ${category}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- 精选课程 -->
+                    <div class="px-6 mb-6">
+                        <h2 class="text-xl font-semibold mb-4">精选课程</h2>
+                        <div class="relative rounded-xl overflow-hidden shadow-md mb-6" onclick="navigateTo('course-detail')">
+                            <img src="https://images.unsplash.com/photo-1536623975707-c4b3b2af565d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="精选课程" class="w-full h-48 object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4 text-white">
+                                <div class="bg-primary text-white px-3 py-1 rounded-full text-xs w-fit mb-2">
+                                    热门
+                                </div>
+                                <h3 class="font-semibold text-lg">21天正念生活挑战</h3>
+                                <p class="text-sm opacity-90 mb-2">将冥想融入日常生活的21天训练营</p>
+                                <div class="flex items-center">
+                                    <span class="bg-white/30 px-3 py-1 rounded-full text-xs mr-2">
+                                        21课时
+                                    </span>
+                                    <span class="bg-white/30 px-3 py-1 rounded-full text-xs">
+                                        每天20分钟
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 所有课程 -->
+                    <div class="px-6 mb-8">
+                        <h2 class="text-xl font-semibold mb-4">所有课程</h2>
+                        <div class="space-y-4">
+                            ${courses.map(course => `
+                                <div class="flex bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100" onclick="navigateTo('course-detail')">
+                                    <div class="w-1/3">
+                                        <img src="${course.image}" alt="${course.title}" class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="w-2/3 p-3">
+                                        <div class="flex justify-between items-start">
+                                            <h3 class="font-medium text-gray-900">${course.title}</h3>
+                                            <span class="bg-background-light text-primary text-xs px-2 py-1 rounded-full">
+                                                ${course.category}
+                                            </span>
+                                        </div>
+                                        <p class="text-sm text-gray-500 line-clamp-2 mb-2">${course.description}</p>
+                                        <div class="flex text-xs text-gray-500">
+                                            <span class="flex items-center mr-3">
+                                                <i class="fas fa-list-ul mr-1"></i> ${course.lessons}课时
+                                            </span>
+                                            <span class="flex items-center">
+                                                <i class="far fa-clock mr-1"></i> ${course.duration}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- 底部导航栏 -->
+                    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 px-6 max-w-md mx-auto">
+                        <button onclick="navigateTo('home')" class="flex flex-col items-center text-gray-500">
+                            <i class="fas fa-home text-xl"></i>
+                            <span class="text-xs mt-1">首页</span>
+                        </button>
+                        <button onclick="navigateTo('courses')" class="flex flex-col items-center text-primary">
+                            <i class="fas fa-book text-xl"></i>
+                            <span class="text-xs mt-1">课程</span>
+                        </button>
+                        <button onclick="navigateTo('meditation-player')" class="flex flex-col items-center text-gray-500">
+                            <div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white -mt-5">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <span class="text-xs mt-1">冥想</span>
+                        </button>
+                        <button onclick="navigateTo('stats')" class="flex flex-col items-center text-gray-500">
+                            <i class="fas fa-chart-bar text-xl"></i>
+                            <span class="text-xs mt-1">统计</span>
+                        </button>
+                        <button onclick="navigateTo('profile')" class="flex flex-col items-center text-gray-500">
+                            <i class="fas fa-user text-xl"></i>
+                            <span class="text-xs mt-1">我的</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 渲染冥想播放页面
+        function renderMeditationPlayerPage() {
+            const pagesContainer = document.getElementById('pages-container');
+            
+            // 模拟冥想数据
+            const meditation = {
+                title: '平静与放松',
+                guide: '王老师',
+                duration: '15:00',
+                currentTime: '06:32',
+                image: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60'
+            };
+            
+            pagesContainer.innerHTML = `
+                <div class="meditation-player-page min-h-screen flex flex-col bg-gradient-to-b from-primary-light/30 to-white">
+                    <!-- 顶部导航 -->
+                    <div class="p-4 flex justify-between items-center">
+                        <button onclick="navigateTo('home')" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/60 text-gray-700 shadow-sm">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="text-center">
+                            <h2 class="font-medium">正在播放</h2>
+                        </div>
+                        <button class="w-10 h-10 flex items-center justify-center rounded-full bg-white/60 text-gray-700 shadow-sm">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- 冥想封面 -->
+                    <div class="flex-1 flex flex-col items-center justify-center p-8">
+                        <div class="w-64 h-64 rounded-full overflow-hidden shadow-lg mb-8 border-8 border-white">
+                            <img src="${meditation.image}" alt="${meditation.title}" class="w-full h-full object-cover">
+                        </div>
+                        
+                        <h1 class="text-2xl font-bold text-gray-800 mb-1">${meditation.title}</h1>
+                        <p class="text-gray-600 mb-8">引导者: ${meditation.guide}</p>
+                        
+                        <!-- 播放进度 -->
+                        <div class="w-full mb-4">
+                            <input type="range" class="audio-player-progress" min="0" max="100" value="42">
+                            <div class="flex justify-between text-sm text-gray-600 mt-1">
+                                <span>${meditation.currentTime}</span>
+                                <span>${meditation.duration}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 播放控制 -->
+                        <div class="flex items-center justify-center space-x-6 mb-8">
+                            <button class="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 text-gray-700 shadow-sm">
+                                <i class="fas fa-step-backward"></i>
+                            </button>
+                            <button class="w-16 h-16 flex items-center justify-center rounded-full bg-primary text-white shadow-lg">
+                                <i class="fas fa-pause text-xl"></i>
+                            </button>
+                            <button class="w-12 h-12 flex items-center justify-center rounded-full bg-white/80 text-gray-700 shadow-sm">
+                                <i class="fas fa-step-forward"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- 额外控制 -->
+                        <div class="flex justify-center space-x-10 text-gray-700">
+                            <button class="flex flex-col items-center text-sm">
+                                <div class="w-10 h-10 flex items-center justify-center rounded-full bg-white/80 shadow-sm mb-1">
+                                    <i class="fas fa-volume-up"></i>
+                                </div>
+                                <span>音量</span>
+                            </button>
+                            <button class="flex flex-col items-center text-sm">
+                                <div class="w-10 h-10 flex items-center justify-center rounded-full bg-white/80 shadow-sm mb-1">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <span>计时器</span>
+                            </button>
+                            <button class="flex flex-col items-center text-sm">
+                                <div class="w-10 h-10 flex items-center justify-center rounded-full bg-white/80 shadow-sm mb-1">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <span>收藏</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 底部提示 -->
+                    <div class="p-6 text-center">
+                        <p class="text-gray-500">
+                            <i class="fas fa-cloud text-primary mr-1"></i> 白噪音背景已开启
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 渲染课程详情页面
+        function renderCourseDetailPage() {
+            const pagesContainer = document.getElementById('pages-container');
+            
+            // 模拟课程数据
+            const course = {
+                id: 1,
+                title: '7天冥想入门',
+                description: '这个课程专为冥想初学者设计，通过7天的引导练习，帮助您建立基础的冥想习惯和技巧。每天只需10分钟，便能体验内心的平静。',
+                image: 'https://images.unsplash.com/photo-1474418397713-b172f2778530?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+                rating: 4.8,
+                reviews: 156,
+                students: 1240,
+                instructor: '李梅',
+                duration: '每天10分钟',
+                level: '初学者'
+            };
+            
+            // 模拟课程章节
+            const lessons = [
+                { id: 1, title: '冥想基础', duration: '10分钟', completed: true },
+                { id: 2, title: '呼吸技巧', duration: '10分钟', completed: true },
+                { id: 3, title: '身体扫描', duration: '10分钟', completed: false },
+                { id: 4, title: '情绪觉察', duration: '10分钟', completed: false },
+                { id: 5, title: '专注训练', duration: '10分钟', completed: false },
+                { id: 6, title: '慈心冥想', duration: '10分钟', completed: false },
+                { id: 7, title: '日常正念练习', duration: '10分钟', completed: false }
+            ];
+            
+            pagesContainer.innerHTML = `
+                <div class="course-detail-page pb-16">
+                    <!-- 课程封面 -->
+                    <div class="relative">
+                        <img src="${course.image}" alt="${course.title}" class="w-full h-64 object-cover">
+                        <div class="absolute top-0 left-0 right-0 p-4">
+                            <button onclick="navigateTo('courses')" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/80 text-gray-700 shadow-sm">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-6 text-white">
+                            <div class="flex items-center mb-1">
+                                <span class="bg-primary text-white text-xs px-2 py-1 rounded-full mr-2">${course.level}</span>
+                                <div class="flex items-center text-yellow-400 text-sm">
+                                    <i class="fas fa-star mr-1"></i>
+                                    <span>${course.rating}</span>
+                                    <span class="text-white text-opacity-80 ml-1">(${course.reviews})</span>
+                                </div>
+                            </div>
+                            <h1 class="text-2xl font-bold mb-2">${course.title}</h1>
+                            <div class="flex items-center text-sm opacity-90">
+                                <span class="flex items-center mr-4">
+                                    <i class="far fa-clock mr-1"></i> ${course.duration}
+                                </span>
+                                <span class="flex items-center">
+                                    <i class="fas fa-user-graduate mr-1"></i> ${course.students}名学员
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 课程内容 -->
+                    <div class="p-6">
+                        <div class="flex mb-6">
+                            <button class="flex-1 py-3 text-center border-b-2 border-primary text-primary font-medium">
+                                课程介绍
+                            </button>
+                            <button class="flex-1 py-3 text-center border-b-2 border-gray-200 text-gray-500">
+                                学员评价
+                            </button>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h2 class="text-lg font-semibold mb-2">关于这门课程</h2>
+                            <p class="text-gray-600 mb-4">${course.description}</p>
+                            <div class="flex items-center mb-4">
+                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=crop&w=64&q=80" 
+                                     alt="${course.instructor}" class="w-12 h-12 rounded-full object-cover mr-4">
+                                <div>
+                                    <h3 class="font-medium">${course.instructor}</h3>
+                                    <p class="text-sm text-gray-500">冥想导师</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h2 class="text-lg font-semibold mb-4">课程内容</h2>
+                            <div class="space-y-3">
+                                ${lessons.map((lesson, index) => `
+                                    <div class="flex items-center p-3 bg-white rounded-lg border border-gray-100 shadow-sm" 
+                                         onclick="navigateTo('meditation-player')">
+                                        <div class="h-10 w-10 rounded-full flex items-center justify-center bg-background-light text-primary mr-3 flex-shrink-0">
+                                            <span>${index + 1}</span>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <h3 class="font-medium truncate">${lesson.title}</h3>
+                                            <p class="text-sm text-gray-500">${lesson.duration}</p>
+                                        </div>
+                                        <div class="ml-3">
+                                            ${lesson.completed 
+                                                ? '<i class="fas fa-check-circle text-green-500 text-xl"></i>' 
+                                                : '<i class="fas fa-lock text-gray-400 text-xl"></i>'}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 底部按钮 -->
+                    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 max-w-md mx-auto">
+                        <button onclick="navigateTo('meditation-player')" class="w-full bg-primary hover:bg-primary-dark text-white py-3 px-6 rounded-lg shadow-md transition duration-300 text-lg font-medium">
+                            开始课程
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 渲染统计页面
+        function renderStatsPage() {
+            const pagesContainer = document.getElementById('pages-container');
+            
+            // 模拟用户统计数据
+            const stats = {
+                streak: 7,
+                totalSessions: 28,
+                totalMinutes: 328,
+                totalDays: 14,
+                weeklyProgress: [15, 30, 20, 25, 40, 35, 25], // 分钟数
+                completedCourses: 2,
+                achievements: [
+                    { name: '初学者', description: '完成第一次冥想', unlocked: true, icon: 'fa-seedling' },
+                    { name: '坚持不懈', description: '连续冥想7天', unlocked: true, icon: 'fa-fire' },
+                    { name: '专注大师', description: '完成10次专注冥想', unlocked: true, icon: 'fa-bullseye' },
+                    { name: '睡眠改善', description: '完成15次睡眠冥想', unlocked: false, icon: 'fa-moon' },
+                    { name: '冥想爱好者', description: '累计冥想10小时', unlocked: false, icon: 'fa-award' },
+                    { name: '正念生活', description: '连续冥想30天', unlocked: false, icon: 'fa-calendar-check' }
+                ]
+            };
+            
+            pagesContainer.innerHTML = `
+                <div class="stats-page pb-16">
+                    <!-- 顶部标题栏 -->
+                    <div class="sticky top-0 z-10 bg-white px-6 py-4 border-b border-gray-200">
+                        <h1 class="text-2xl font-bold text-gray-800">我的统计</h1>
+                    </div>
+                    
+                    <!-- 总览统计卡片 -->
+                    <div class="p-6">
+                        <div class="bg-gradient-to-r from-primary to-secondary-dark text-white rounded-xl p-5 shadow-md mb-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center mr-4">
+                                    <i class="fas fa-fire text-primary text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-2xl font-bold">${stats.streak}天</h2>
+                                    <p class="text-secondary-light">当前连续冥想</p>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-4 text-center">
+                                <div class="bg-white/20 rounded-lg p-3">
+                                    <h3 class="text-xl font-semibold">${stats.totalMinutes}</h3>
+                                    <p class="text-xs opacity-80">总冥想分钟</p>
+                                </div>
+                                <div class="bg-white/20 rounded-lg p-3">
+                                    <h3 class="text-xl font-semibold">${stats.totalSessions}</h3>
+                                    <p class="text-xs opacity-80">总冥想次数</p>
+                                </div>
+                                <div class="bg-white/20 rounded-lg p-3">
+                                    <h3 class="text-xl font-semibold">${stats.completedCourses}</h3>
+                                    <p class="text-xs opacity-80">完成课程</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 周进度 -->
+                    <div class="px-6 mb-6">
+                        <h2 class="text-xl font-semibold mb-4">本周进度</h2>
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                            <div class="flex justify-between items-end h-40 mb-2">
+                                ${stats.weeklyProgress.map(minutes => {
+                                    const height = minutes * 100 / Math.max(...stats.weeklyProgress);
+                                    return `
+                                        <div class="w-8 flex flex-col items-center">
+                                            <div class="relative w-full">
+                                                <div class="absolute bottom-0 left-0 right-0 bg-primary rounded-t-md" 
+                                                     style="height: ${height}%"></div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500">
+                                <div class="w-8 text-center">一</div>
+                                <div class="w-8 text-center">二</div>
+                                <div class="w-8 text-center">三</div>
+                                <div class="w-8 text-center">四</div>
+                                <div class="w-8 text-center">五</div>
+                                <div class="w-8 text-center">六</div>
+                                <div class="w-8 text-center">日</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 成就 -->
+                    <div class="px-6 mb-8">
+                        <h2 class="text-xl font-semibold mb-4">我的成就</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            ${stats.achievements.map(achievement => `
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center ${!achievement.unlocked ? 'opacity-50' : ''}">
+                                    <div class="w-12 h-12 rounded-full ${achievement.unlocked ? 'bg-primary' : 'bg-gray-300'} text-white flex items-center justify-center mb-2">
+                                        <i class="fas ${achievement.icon} text-xl"></i>
+                                    </div>
+                                    <h3 class="font-medium mb-1">${achievement.name}</h3>
+                                    <p class="text-xs text-gray-500">${achievement.description}</p>
+                                    ${achievement.unlocked ? '<span class="text-xs text-primary mt-2">已解锁</span>' : '<span class="text-xs text-gray-400 mt-2">未解锁</span>'}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- 底部导航栏 -->
+                    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 px-6 max-w-md mx-auto">
+                        <button onclick="navigateTo('home')" class="flex flex-col items-center text-gray-500">
+                            <i class="fas fa-home text-xl"></i>
+                            <span class="text-xs mt-1">首页</span>
+                        </button>
+                        <button onclick="navigateTo('courses')" class="flex flex-col items-center text-gray-500">
+                            <i class="fas fa-book text-xl"></i>
+                            <span class="text-xs mt-1">课程</span>
+                        </button>
+                        <button onclick="navigateTo('meditation-player')" class="flex flex-col items-center text-gray-500">
+                            <div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white -mt-5">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <span class="text-xs mt-1">冥想</span>
+                        </button>
+                        <button onclick="navigateTo('stats')" class="flex flex-col items-center text-primary">
+                            <i class="fas fa-chart-bar text-xl"></i>
+                            <span class="text-xs mt-1">统计</span>
+                        </button>
+                        <button onclick="navigateTo('profile')" class="flex flex-col items-center text-gray-500">
+                            <i class="fas fa-user text-xl"></i>
+                            <span class="text-xs mt-1">我的</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 渲染个人中心页面
+        function renderProfilePage() {
+            const pagesContainer = document.getElementById('pages-container');
+            
+            // 模拟用户数据
+            const user = {
+                name: '李明',
+                email: 'liming@example.com',
+                avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
+                memberSince: '2023年6月',
+                isPremium: true,
+                streak: 7,
+                totalMinutes: 328,
+                favoriteCount: 5,
+                downloadCount: 3
+            };
+            
+            pagesContainer.innerHTML = `
+                <div class="profile-page pb-16">
+                    <!-- 顶部个人信息 -->
+                    <div class="bg-gradient-to-r from-primary to-secondary-dark text-white pt-6 pb-12 px-6 rounded-b-3xl">
+                        <div class="flex justify-between items-center mb-4">
+                            <h1 class="text-2xl font-bold">个人中心</h1>
+                            <button onclick="navigateTo('settings')" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/20 text-white">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <div class="w-20 h-20 rounded-full border-4 border-white overflow-hidden mr-5">
+                                <img src="${user.avatar}" alt="${user.name}" class="w-full h-full object-cover">
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-semibold flex items-center">
+                                    ${user.name}
+                                    ${user.isPremium ? '<span class="ml-2 bg-yellow-400 text-yellow-800 text-xs px-2 py-1 rounded-full">会员</span>' : ''}
+                                </h2>
+                                <p class="opacity-80">${user.email}</p>
+                                <p class="text-sm opacity-70 mt-1">加入时间: ${user.memberSince}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 统计卡片 -->
+                    <div class="px-6 mt-[-2rem] mb-6">
+                        <div class="bg-white rounded-xl shadow-md p-4 grid grid-cols-2 gap-4">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-full bg-background-light flex items-center justify-center mr-3">
+                                    <i class="fas fa-fire text-primary text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-semibold">${user.streak}天</h3>
+                                    <p class="text-xs text-gray-500">连续冥想</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-full bg-background-light flex items-center justify-center mr-3">
+                                    <i class="fas fa-clock text-primary text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-semibold">${user.totalMinutes}分钟</h3>
+                                    <p class="text-xs text-gray-500">总冥想时间</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 操作列表 -->
+                    <div class="px-6 mb-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                            <button onclick="navigateTo('history')" class="w-full flex items-center justify-between p-4 border-b border-gray-100">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-background-light flex items-center justify-center mr-4">
+                                        <i class="fas fa-history text-primary"></i>
+                                    </div>
+                                    <span>冥想历史</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </button>
+                            <button class="w-full flex items-center justify-between p-4 border-b border-gray-100">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-background-light flex items-center justify-center mr-4">
+                                        <i class="fas fa-heart text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <span>我的收藏</span>
+                                        <span class="ml-2 bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">${user.favoriteCount}</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </button>
+                            <button class="w-full flex items-center justify-between p-4 border-b border-gray-100">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-background-light flex items-center justify-center mr-4">
+                                        <i class="fas fa-download text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <span>离线下载</span>
+                                        <span class="ml-2 bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">${user.downloadCount}</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </button>
+                            <button onclick="navigateTo('settings')" class="w-full flex items-center justify-between p-4">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-background-light flex items-center justify-center mr-4">
+                                        <i class="fas fa-cog text-primary"></i>
+                                    </div>
+                                    <span>设置</span>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 订阅卡片 -->
+                    <div class="px-6 mb-8">
+                        ${user.isPremium ? `
+                            <div class="bg-gradient-to-r from-primary to-secondary-dark text-white rounded-xl p-4 shadow-md">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h3 class="text-lg font-semibold mb-1">高级会员</h3>
+                                        <p class="text-sm opacity-90">您的会员将于2024年6月到期</p>
+                                    </div>
+                                    <div class="bg-yellow-400 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                                        已激活
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="bg-white text-primary text-sm px-4 py-2 rounded-lg shadow-sm font-medium">
+                                        管理订阅
+                                    </button>
+                                    <button class="bg-white/20 text-white text-sm px-4 py-2 rounded-lg font-medium">
+                                        查看权益
+                                    </button>
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="bg-white rounded-xl shadow-md border border-gray-200 p-4 text-center">
+                                <div class="w-16 h-16 rounded-full bg-background-light flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-crown text-primary text-2xl"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold mb-2">解锁更多冥想体验</h3>
+                                <p class="text-sm text-gray-600 mb-4">升级到高级会员，畅享所有高级冥想内容和功能</p>
+                                <button class="bg-primary hover:bg-primary-dark text-white py-3 px-6 rounded-lg shadow-md transition duration-300 font-medium w-full">
+                                    升级会员
+                                </button>
+                            </div>
+                        `}
+                    </div>
+                    
+                    <!-- 底部导航栏 -->
+                    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 px-6 max-w-md mx-auto">
+                        <button onclick="navigateTo('home')" class="flex flex-col items-center text-gray-500">
+                            <i class="fas fa-home text-xl"></i>
+                            <span class="text-xs mt-1">首页</span>
+                        </button>
+                        <button onclick="navigateTo('courses')" class="flex flex-col items-center text-gray-500">
+                            <i class="fas fa-book text-xl"></i>
+                            <span class="text-xs mt-1">课程</span>
+                        </button>
+                        <button onclick="navigateTo('meditation-player')" class="flex flex-col items-center text-gray-500">
+                            <div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white -mt-5">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <span class="text-xs mt-1">冥想</span>
+                        </button>
+                        <button onclick="navigateTo('stats')" class="flex flex-col items-center text-gray-500">
+                            <i class="fas fa-chart-bar text-xl"></i>
+                            <span class="text-xs mt-1">统计</span>
+                        </button>
+                        <button onclick="navigateTo('profile')" class="flex flex-col items-center text-primary">
+                            <i class="fas fa-user text-xl"></i>
+                            <span class="text-xs mt-1">我的</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 渲染设置页面
+        function renderSettingsPage() {
+            const pagesContainer = document.getElementById('pages-container');
+            
+            // 模拟用户设置
+            const settings = {
+                notificationsEnabled: true,
+                dailyReminder: true,
+                reminderTime: '21:00',
+                theme: 'light',
+                downloadOverWifi: true,
+                language: '简体中文'
+            };
+            
+            pagesContainer.innerHTML = `
+                <div class="settings-page pb-16">
+                    <!-- 顶部标题栏 -->
+                    <div class="sticky top-0 z-10 bg-white px-6 py-4 border-b border-gray-200 flex items-center">
+                        <button onclick="navigateTo('profile')" class="mr-4 text-gray-600">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <h1 class="text-xl font-bold text-gray-800">设置</h1>
+                    </div>
+                    
+                    <!-- 设置选项组 -->
+                    <div class="p-6">
+                        <!-- 通知设置 -->
+                        <div class="mb-8">
+                            <h2 class="text-lg font-semibold mb-4 text-gray-800">通知</h2>
+                            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                                <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+                                    <div>
+                                        <h3 class="font-medium">推送通知</h3>
+                                        <p class="text-sm text-gray-500">接收冥想提醒和课程更新</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer" ${settings.notificationsEnabled ? 'checked' : ''}>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
+                                <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+                                    <div>
+                                        <h3 class="font-medium">每日提醒</h3>
+                                        <p class="text-sm text-gray-500">设置每日冥想提醒</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer" ${settings.dailyReminder ? 'checked' : ''}>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
+                                <div class="p-4 flex justify-between items-center">
+                                    <div>
+                                        <h3 class="font-medium">提醒时间</h3>
+                                        <p class="text-sm text-gray-500">设置每日提醒的时间</p>
+                                    </div>
+                                    <div class="flex items-center text-primary">
+                                        <span class="mr-2">${settings.reminderTime}</span>
+                                        <i class="fas fa-chevron-right text-gray-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 应用设置 -->
+                        <div class="mb-8">
+                            <h2 class="text-lg font-semibold mb-4 text-gray-800">应用</h2>
+                            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                                <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+                                    <div>
+                                        <h3 class="font-medium">主题</h3>
+                                        <p class="text-sm text-gray-500">设置应用显示主题</p>
+                                    </div>
+                                    <div class="flex items-center text-primary">
+                                        <span class="mr-2">${settings.theme === 'light' ? '浅色' : '深色'}</span>
+                                        <i class="fas fa-chevron-right text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+                                    <div>
+                                        <h3 class="font-medium">语言</h3>
+                                        <p class="text-sm text-gray-500">设置应用显示语言</p>
+                                    </div>
+                                    <div class="flex items-center text-primary">
+                                        <span class="mr-2">${settings.language}</span>
+                                        <i class="fas fa-chevron-right text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <div class="p-4 flex justify-between items-center">
+                                    <div>
+                                        <h3 class="font-medium">仅在WiFi下下载</h3>
+                                        <p class="text-sm text-gray-500">节省移动数据流量</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer" ${settings.downloadOverWifi ? 'checked' : ''}>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 账户设置 -->
+                        <div class="mb-8">
+                            <h2 class="text-lg font-semibold mb-4 text-gray-800">账户</h2>
+                            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                                <button class="p-4 w-full border-b border-gray-100 flex justify-between items-center">
+                                    <div>
+                                        <h3 class="font-medium">个人信息</h3>
+                                        <p class="text-sm text-gray-500">修改您的账户信息</p>
+                                    </div>
+                                    <i class="fas fa-chevron-right text-gray-400"></i>
+                                </button>
+                                <button class="p-4 w-full border-b border-gray-100 flex justify-between items-center">
+                                    <div>
+                                        <h3 class="font-medium">修改密码</h3>
+                                        <p class="text-sm text-gray-500">更改您的账户密码</p>
+                                    </div>
+                                    <i class="fas fa-chevron-right text-gray-400"></i>
+                                </button>
+                                <button class="p-4 w-full border-b border-gray-100 flex justify-between items-center">
+                                    <div>
+                                        <h3 class="font-medium">订阅管理</h3>
+                                        <p class="text-sm text-gray-500">管理您的会员订阅</p>
+                                    </div>
+                                    <i class="fas fa-chevron-right text-gray-400"></i>
+                                </button>
+                                <button class="p-4 w-full flex justify-between items-center">
+                                    <div>
+                                        <h3 class="font-medium text-red-500">退出登录</h3>
+                                    </div>
+                                    <i class="fas fa-chevron-right text-gray-400"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 关于 -->
+                        <div class="mb-8">
+                            <h2 class="text-lg font-semibold mb-4 text-gray-800">关于</h2>
+                            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                                <button class="p-4 w-full border-b border-gray-100 flex justify-between items-center">
+                                    <div>
+                                        <h3 class="font-medium">帮助中心</h3>
+                                        <p class="text-sm text-gray-500">获取帮助与支持</p>
+                                    </div>
+                                    <i class="fas fa-chevron-right text-gray-400"></i>
+                                </button>
+                                <button class="p-4 w-full border-b border-gray-100 flex justify-between items-center">
+                                    <div>
+                                        <h3 class="font-medium">隐私政策</h3>
+                                    </div>
+                                    <i class="fas fa-chevron-right text-gray-400"></i>
+                                </button>
+                                <button class="p-4 w-full border-b border-gray-100 flex justify-between items-center">
+                                    <div>
+                                        <h3 class="font-medium">服务条款</h3>
+                                    </div>
+                                    <i class="fas fa-chevron-right text-gray-400"></i>
+                                </button>
+                                <div class="p-4 flex justify-between items-center">
+                                    <div>
+                                        <h3 class="font-medium">版本</h3>
+                                    </div>
+                                    <span class="text-gray-500">1.0.0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 渲染冥想历史记录页面
+        function renderHistoryPage() {
+            const pagesContainer = document.getElementById('pages-container');
+            
+            // 模拟历史记录数据
+            const history = [
+                { 
+                    id: 1, 
+                    title: '平静与放松', 
+                    date: '今天', 
+                    time: '21:30', 
+                    duration: '15分钟',
+                    completed: true,
+                    image: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60' 
+                },
+                { 
+                    id: 2, 
+                    title: '晨间唤醒', 
+                    date: '今天', 
+                    time: '07:15', 
+                    duration: '10分钟',
+                    completed: true,
+                    image: 'https://images.unsplash.com/photo-1477332552946-cfb384aeaf1c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60' 
+                },
+                { 
+                    id: 3, 
+                    title: '深度睡眠冥想', 
+                    date: '昨天', 
+                    time: '22:00', 
+                    duration: '20分钟',
+                    completed: true,
+                    image: 'https://images.unsplash.com/photo-1455203168698-9d67426e1739?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60' 
+                },
+                { 
+                    id: 4, 
+                    title: '工作专注力提升', 
+                    date: '昨天', 
+                    time: '14:30', 
+                    duration: '15分钟',
+                    completed: false,
+                    image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60' 
+                },
+                { 
+                    id: 5, 
+                    title: '压力管理冥想', 
+                    date: '2023-11-12', 
+                    time: '19:45', 
+                    duration: '15分钟',
+                    completed: true,
+                    image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60' 
+                },
+                { 
+                    id: 6, 
+                    title: '身体扫描冥想', 
+                    date: '2023-11-10', 
+                    time: '20:15', 
+                    duration: '15分钟',
+                    completed: true,
+                    image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60' 
+                }
+            ];
+            
+            // 按日期分组
+            const groupedHistory = {};
+            history.forEach(item => {
+                if (!groupedHistory[item.date]) {
+                    groupedHistory[item.date] = [];
+                }
+                groupedHistory[item.date].push(item);
+            });
+            
+            pagesContainer.innerHTML = `
+                <div class="history-page pb-16">
+                    <!-- 顶部标题栏 -->
+                    <div class="sticky top-0 z-10 bg-white px-6 py-4 border-b border-gray-200 flex items-center">
+                        <button onclick="navigateTo('profile')" class="mr-4 text-gray-600">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <h1 class="text-xl font-bold text-gray-800">冥想历史</h1>
+                    </div>
+                    
+                    <!-- 统计卡片 -->
+                    <div class="p-6">
+                        <div class="bg-gradient-to-r from-primary to-secondary-dark text-white rounded-xl p-5 shadow-md mb-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center mr-4">
+                                    <i class="fas fa-calendar-check text-primary text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-2xl font-bold">11月</h2>
+                                    <p class="text-secondary-light">本月冥想记录</p>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-4 text-center">
+                                <div class="bg-white/20 rounded-lg p-3">
+                                    <h3 class="text-xl font-semibold">14天</h3>
+                                    <p class="text-xs opacity-80">冥想天数</p>
+                                </div>
+                                <div class="bg-white/20 rounded-lg p-3">
+                                    <h3 class="text-xl font-semibold">28次</h3>
+                                    <p class="text-xs opacity-80">冥想次数</p>
+                                </div>
+                                <div class="bg-white/20 rounded-lg p-3">
+                                    <h3 class="text-xl font-semibold">328分钟</h3>
+                                    <p class="text-xs opacity-80">总时长</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 历史记录列表 -->
+                    <div class="px-6 mb-6">
+                        ${Object.keys(groupedHistory).map(date => `
+                            <div class="mb-6">
+                                <h2 class="text-lg font-semibold mb-3">${date}</h2>
+                                <div class="space-y-3">
+                                    ${groupedHistory[date].map(item => `
+                                        <div class="flex bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100" onclick="navigateTo('meditation-player')">
+                                            <div class="w-1/4">
+                                                <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover">
+                                            </div>
+                                            <div class="w-3/4 p-3">
+                                                <div class="flex justify-between items-start">
+                                                    <h3 class="font-medium text-gray-900">${item.title}</h3>
+                                                    <span class="text-xs text-gray-500">${item.time}</span>
+                                                </div>
+                                                <div class="flex items-center mt-1">
+                                                    <span class="text-xs text-gray-500 flex items-center mr-3">
+                                                        <i class="far fa-clock mr-1"></i> ${item.duration}
+                                                    </span>
+                                                    <span class="text-xs ${item.completed ? 'text-green-500' : 'text-orange-500'} flex items-center">
+                                                        <i class="fas ${item.completed ? 'fa-check-circle' : 'fa-pause-circle'} mr-1"></i> 
+                                                        ${item.completed ? '已完成' : '未完成'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <!-- 底部加载更多 -->
+                    <div class="px-6 mb-8 text-center">
+                        <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition duration-200">
+                            加载更多
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCurrentPage();
+        });
+    </script>
+</body>
+</html> 
