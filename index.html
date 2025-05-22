@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI对话助手 - 知识库管理平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#722ED1',
+                        success: '#00B42A',
+                        warning: '#FF7D00',
+                        danger: '#F53F3F',
+                        dark: '#1D2129',
+                        light: '#F2F3F5',
+                        'gray-100': '#F7F8FA',
+                        'gray-200': '#E5E6EB',
+                        'gray-300': '#C9CDD4',
+                        'gray-400': '#86909C',
+                        'gray-500': '#4E5969',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 4px 20px rgba(0, 0, 0, 0.08)',
+                        'card-hover': '0 8px 30px rgba(0, 0, 0, 0.12)',
+                    }
+                },
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .text-balance {
+                text-wrap: balance;
+            }
+            .animate-fade-in {
+                animation: fadeIn 0.3s ease-in-out;
+            }
+            .animate-slide-up {
+                animation: slideUp 0.4s ease-out;
+            }
+            .animate-pulse-slow {
+                animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+            .backdrop-blur-sm {
+                backdrop-filter: blur(4px);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-100 text-dark min-h-screen flex flex-col">
+    <!-- 登录页面 -->
+    <div id="login-page" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/90 to-secondary/90 p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 animate-fade-in">
+            <div class="text-center mb-8">
+                <div class="text-primary text-4xl mb-2">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    AI对话助手
+                </h1>
+                <p class="text-gray-400 mt-1">智能知识库管理平台</p>
+            </div>
+            
+            <form class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">用户名</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fa-solid fa-user text-gray-400"></i>
+                        </div>
+                        <input type="text" class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors" placeholder="请输入用户名">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">密码</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fa-solid fa-lock text-gray-400"></i>
+                        </div>
+                        <input type="password" class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors" placeholder="请输入密码">
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input id="remember-me" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary/50 border-gray-300 rounded">
+                        <label for="remember-me" class="ml-2 block text-sm text-gray-500">记住我</label>
+                    </div>
+                    <a href="#" class="text-sm text-primary hover:text-primary/80 transition-colors">忘记密码?</a>
+                </div>
+                
+                <button type="button" id="login-btn" class="w-full py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-primary/20 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-sign-in"></i>
+                    <span>登录</span>
+                </button>
+                
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-200"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-gray-400">或者</span>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-4">
+                    <button type="button" class="flex items-center justify-center py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i class="fa-brands fa-weixin text-[#07C160]"></i>
+                    </button>
+                    <button type="button" class="flex items-center justify-center py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i class="fa-brands fa-github text-[#181717]"></i>
+                    </button>
+                    <button type="button" class="flex items-center justify-center py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i class="fa-brands fa-google text-[#4285F4]"></i>
+                    </button>
+                </div>
+            </form>
+            
+            <div class="mt-6 text-center text-sm text-gray-500">
+                还没有账号? <a href="#" class="text-primary hover:text-primary/80 transition-colors">立即注册</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主应用 -->
+    <div id="app" class="hidden">
+        <!-- 顶部导航栏 -->
+        <header class="bg-white shadow-sm sticky top-0 z-50 transition-all duration-300" id="navbar">
+            <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="text-primary text-2xl">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                        AI对话助手
+                    </h1>
+                </div>
+                
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="#dashboard" class="text-primary font-medium">仪表盘</a>
+                    <a href="#knowledge-base" class="text-gray-500 hover:text-primary transition-colors">知识库</a>
+                    <a href="#document-management" class="text-gray-500 hover:text-primary transition-colors">文档管理</a>
+                    <a href="#upload-history" class="text-gray-500 hover:text-primary transition-colors">上传历史</a>
+                </nav>
+                
+                <div class="flex items-center space-x-4">
+                    <button class="hidden md:block text-gray-500 hover:text-primary transition-colors">
+                        <i class="fa-solid fa-bell"></i>
+                    </button>
+                    <div class="relative">
+                        <button id="user-menu-btn" class="flex items-center space-x-1">
+                            <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <span class="hidden md:inline-block text-sm font-medium">管理员</span>
+                            <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+                        </button>
+                        
+                        <!-- 用户菜单 -->
+                        <div id="user-menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 animate-fade-in">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">个人资料</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">账户设置</a>
+                            <div class="border-t border-gray-100 my-1"></div>
+                            <a href="#" id="logout-btn" class="block px-4 py-2 text-sm text-danger hover:bg-gray-100">退出登录</a>
+                        </div>
+                    </div>
+                    <button class="md:hidden text-gray-500">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 内容区域 -->
+        <main class="container mx-auto px-4 py-6">
+            <!-- 仪表盘页面 -->
+            <div id="dashboard-page" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover border-l-4 border-primary">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-400 text-sm">总知识库</p>
+                                <h3 class="text-2xl font-bold mt-1">12</h3>
+                                <p class="text-success text-xs mt-2 flex items-center">
+                                    <i class="fa-solid fa-arrow-up mr-1"></i> 2 个 (本周)
+                                </p>
+                            </div>
+                            <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                <i class="fa-solid fa-book text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover border-l-4 border-secondary">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-400 text-sm">文档总数</p>
+                                <h3 class="text-2xl font-bold mt-1">156</h3>
+                                <p class="text-success text-xs mt-2 flex items-center">
+                                    <i class="fa-solid fa-arrow-up mr-1"></i> 18 个 (本周)
+                                </p>
+                            </div>
+                            <div class="h-12 w-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                                <i class="fa-solid fa-file-text text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover border-l-4 border-success">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-400 text-sm">处理成功</p>
+                                <h3 class="text-2xl font-bold mt-1">142</h3>
+                                <p class="text-success text-xs mt-2 flex items-center">
+                                    <i class="fa-solid fa-check-circle mr-1"></i> 91%
+                                </p>
+                            </div>
+                            <div class="h-12 w-12 rounded-full bg-success/10 flex items-center justify-center text-success">
+                                <i class="fa-solid fa-check text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover border-l-4 border-warning">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-400 text-sm">对话次数</p>
+                                <h3 class="text-2xl font-bold mt-1">328</h3>
+                                <p class="text-success text-xs mt-2 flex items-center">
+                                    <i class="fa-solid fa-arrow-up mr-1"></i> 42 次 (本周)
+                                </p>
+                            </div>
+                            <div class="h-12 w-12 rounded-full bg-warning/10 flex items-center justify-center text-warning">
+                                <i class="fa-solid fa-comments text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="font-bold text-xl">文档上传趋势</h2>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 text-xs rounded-lg bg-primary/10 text-primary">周</button>
+                                <button class="px-3 py-1 text-xs rounded-lg hover:bg-gray-100 text-gray-500">月</button>
+                                <button class="px-3 py-1 text-xs rounded-lg hover:bg-gray-100 text-gray-500">年</button>
+                            </div>
+                        </div>
+                        <div class="h-80">
+                            <!-- 图表将在这里渲染 -->
+                            <div class="flex items-center justify-center h-full text-gray-400">
+                                <i class="fa-solid fa-chart-line text-4xl"></i>
+                                <p class="ml-2">图表数据加载中...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="font-bold text-xl">知识库分布</h2>
+                            <button class="text-primary hover:text-primary/80 transition-colors">
+                                <i class="fa-solid fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                        <div class="h-80">
+                            <!-- 图表将在这里渲染 -->
+                            <div class="flex items-center justify-center h-full text-gray-400">
+                                <i class="fa-solid fa-pie-chart text-4xl"></i>
+                                <p class="ml-2">图表数据加载中...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="font-bold text-lg">最近上传</h2>
+                            <a href="#upload-history" class="text-primary text-sm hover:text-primary/80 transition-colors">查看全部</a>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 rounded bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <h3 class="text-sm font-medium">产品使用手册.pdf</h3>
+                                    <p class="text-xs text-gray-400">今天 14:30</p>
+                                </div>
+                                <span class="px-2 py-0.5 text-xs bg-green-100 text-green-800 rounded-full">已处理</span>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 rounded bg-indigo-100 flex items-center justify-center text-indigo-600 mr-3">
+                                    <i class="fa-solid fa-file-word"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <h3 class="text-sm font-medium">技术规格说明书.docx</h3>
+                                    <p class="text-xs text-gray-400">昨天 09:15</p>
+                                </div>
+                                <span class="px-2 py-0.5 text-xs bg-green-100 text-green-800 rounded-full">已处理</span>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 rounded bg-yellow-100 flex items-center justify-center text-yellow-600 mr-3">
+                                    <i class="fa-solid fa-file-excel"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <h3 class="text-sm font-medium">销售数据统计.xlsx</h3>
+                                    <p class="text-xs text-gray-400">昨天 16:45</p>
+                                </div>
+                                <span class="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded-full">处理中</span>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 rounded bg-gray-100 flex items-center justify-center text-gray-600 mr-3">
+                                    <i class="fa-solid fa-file-text"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <h3 class="text-sm font-medium">会议记录.txt</h3>
+                                    <p class="text-xs text-gray-400">2023-06-12</p>
+                                </div>
+                                <span class="px-2 py-0.5 text-xs bg-red-100 text-red-800 rounded-full">失败</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="font-bold text-lg">活跃知识库</h2>
+                            <a href="#knowledge-base" class="text-primary text-sm hover:text-primary/80 transition-colors">查看全部</a>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="p-3 bg-primary/5 rounded-lg flex items-center justify-between cursor-pointer group">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+                                        <i class="fa-solid fa-book"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-medium text-sm">默认知识库</h3>
+                                        <p class="text-xs text-gray-400">42个文档</p>
+                                    </div>
+                                </div>
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i class="fa-solid fa-ellipsis-v text-gray-400"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 hover:bg-gray-100 rounded-lg flex items-center justify-between cursor-pointer group transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-8 w-8 rounded-lg bg-secondary/20 flex items-center justify-center text-secondary">
+                                        <i class="fa-solid fa-file-text"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-medium text-sm">产品说明书</h3>
+                                        <p class="text-xs text-gray-400">28个文档</p>
+                                    </div>
+                                </div>
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i class="fa-solid fa-ellipsis-v text-gray-400"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 hover:bg-gray-100 rounded-lg flex items-center justify-between cursor-pointer group transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-8 w-8 rounded-lg bg-success/20 flex items-center justify-center text-success">
+                                        <i class="fa-solid fa-database"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-medium text-sm">技术文档</h3>
+                                        <p class="text-xs text-gray-400">21个文档</p>
+                                    </div>
+                                </div>
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i class="fa-solid fa-ellipsis-v text-gray-400"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 hover:bg-gray-100 rounded-lg flex items-center justify-between cursor-pointer group transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-8 w-8 rounded-lg bg-warning/20 flex items-center justify-center text-warning">
+                                        <i class="fa-solid fa-folder"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-medium text-sm">营销材料</h3>
+                                        <p class="text-xs text-gray-400">15个文档</p>
+                                    </div>
+                                </div>
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i class="fa-solid fa-ellipsis-v text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="font-bold text-lg">AI对话统计</h2>
+                            <button class="text-primary hover:text-primary/80 transition-colors">
+                                <i class="fa-solid fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm text-gray-500">今日对话</span>
+                                    <span class="text-sm font-medium">28</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-primary h-2 rounded-full" style="width: 70%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm text-gray-500">准确率</span>
+                                    <span class="text-sm font-medium">92%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-success h-2 rounded-full" style="width: 92%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm text-gray-500">平均响应时间</span>
+                                    <span class="text-sm font-medium">2.4秒</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-warning h-2 rounded-full" style="width: 35%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm text-gray-500">知识库覆盖率</span>
+                                    <span class="text-sm font-medium">87%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-secondary h-2 rounded-full" style="width: 87%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6">
+                                <button class="w-full py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors flex items-center justify-center space-x-2">
+                                    <i class="fa-solid fa-chart-bar"></i>
+                                    <span>查看详细报告</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 知识库页面 -->
+            <div id="knowledge-base-page" class="hidden space-y-6">
+                <div class="bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                        <div>
+                            <h2 class="font-bold text-xl">知识库管理</h2>
+                            <p class="text-gray-400 text-sm">管理和组织您的知识库，支持分类和搜索</p>
+                        </div>
+                        <div class="mt-4 md:mt-0 flex items-center space-x-3">
+                            <div class="relative">
+                                <input type="text" placeholder="搜索知识库..." class="pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors w-full md:w-64">
+                                <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            </div>
+                            <button id="add-new-knowledge-base" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors shadow-sm hover:shadow flex items-center space-x-2">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>新建知识库</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="border border-gray-200 rounded-xl p-5 hover:border-primary/50 hover:shadow-md transition-all duration-300 cursor-pointer">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                    <i class="fa-solid fa-book"></i>
+                                </div>
+                                <div class="text-xs text-gray-400">创建于 2023-05-10</div>
+                            </div>
+                            <h3 class="font-bold text-lg mb-1">默认知识库</h3>
+                            <p class="text-gray-400 text-sm mb-4">用于存放通用知识和常见问题解答</p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center text-xs text-gray-500">
+                                    <i class="fa-solid fa-file-text mr-1"></i> 42 个文档
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="text-gray-400 hover:text-primary transition-colors">
+                                        <i class="fa-solid fa-pencil"></i>
+                                    </button>
+                                    <button class="text-gray-400 hover:text-primary transition-colors">
+                                        <i class="fa-solid fa-ellipsis-v"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-gray-200 rounded-xl p-5 hover:border-primary/50 hover:shadow-md transition-all duration-300 cursor-pointer">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="h-10 w-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                                    <i class="fa-solid fa-file-text"></i>
+                                </div>
+                                <div class="text-xs text-gray-400">创建于 2023-05-15</div>
+                            </div>
+                            <h3 class="font-bold text-lg mb-1">产品说明书</h3>
+                            <p class="text-gray-400 text-sm mb-4">包含所有产品的详细说明和使用指南</p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center text-xs text-gray-500">
+                                    <i class="fa-solid fa-file-text mr-1"></i> 28 个文档
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="text-gray-400 hover:text-primary transition-colors">
+                                        <i class="fa-solid fa-pencil"></i>
+                                    </button>
+                                    <button class="text-gray-400 hover:text-primary transition-colors">
+                                        <i class="fa-solid fa-ellipsis-v"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-gray-200 rounded-xl p-5 hover:border-primary/50 hover:shadow-md transition-all duration-300 cursor-pointer">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="h-10 w-10 rounded-full bg-success/10 flex items-center justify-center text-success">
+                                    <i class="fa-solid fa-database"></i>
+                                </div>
+                                <div class="text-xs text-gray-400">创建于 2023-05-20</div>
+                            </div>
+                            <h3 class="font-bold text-lg mb-1">技术文档</h3>
+                            <p class="text-gray-400 text-sm mb-4">存放技术规格、API文档和开发指南</p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center text-xs text-gray-500">
+                                    <i class="fa-solid fa-file-text mr-1"></i> 21 个文档
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="text-gray-400 hover:text-primary transition-colors">
+                                        <i class="fa-solid fa-pencil"></i>
+                                    </button>
+                                    <button class="text-gray-400 hover:text-primary transition-colors">
+                                        <i class="fa-solid fa-ellipsis-v"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-gray-200 rounded-xl p-5 hover:border-primary/50 hover:shadow-md transition-all duration-300 cursor-pointer">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="h-10 w-10 rounded-full bg-warning/10 flex items-center justify-center text-warning">
+                                    <i class="fa-solid fa-folder"></i>
+                                </div>
+                                <div class="text-xs text-gray-400">创建于 2023-05-25</div>
+                            </div>
+                            <h3 class="font-bold text-lg mb-1">营销材料</h3>
+                            <p class="text-gray-400 text-sm mb-4">包含产品宣传资料、案例和市场分析</p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center text-xs text-gray-500">
+                                    <i class="fa-solid fa-file-text mr-1"></i> 15 个文档
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="text-gray-400 hover:text-primary transition-colors">
+                                        <i class="fa-solid fa-pencil"></i>
+                                    </button>
+                                    <button class="text-gray-400 hover:text-primary transition-colors">
+                                        <i class="fa-solid fa-ellipsis-v"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-gray-200 rounded-xl p-5 hover:border-primary/50 hover:shadow-md transition-all duration-300 cursor-pointer">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="h-10 w-10 rounded-full bg-danger/10 flex items-center justify-center text-danger">
+                                    <i class="fa-solid fa-question-circle"></i>
+                                </div>
+                                <div class="text-xs text-gray-400">创建于 2023-06-01</div>
+                            </div>
+                            <h3 class="font-bold text-lg mb-1">常见问题</h3>
+                            <p class="text-gray-400 text-sm mb-4">用户常见问题的解答和解决方案</p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center text-xs text-gray-500">
+                                    <i class="fa-solid fa-file-text mr-1"></i> 36 个文档
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="text-gray-400 hover:text-primary transition-colors">
+                                        <i class="fa-solid fa-pencil"></i>
+                                    </button>
+                                    <button class="text-gray-400 hover:text-primary transition-colors">
+                                        <i class="fa-solid fa-ellipsis-v"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-5 flex flex-col items-center justify-center hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 cursor-pointer">
+                            <div class="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-3">
+                                <i class="fa-solid fa-plus text-xl"></i>
+                            </div>
+                            <h3 class="font-medium text-gray-500">创建新的知识库</h3>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="font-bold text-xl">知识库分析</h2>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-1 text-xs rounded-lg bg-primary/10 text-primary">周</button>
+                            <button class="px-3 py-1 text-xs rounded-lg hover:bg-gray-100 text-gray-500">月</button>
+                            <button class="px-3 py-1 text-xs rounded-lg hover:bg-gray-100 text-gray-500">年</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="h-80">
+                            <!-- 图表将在这里渲染 -->
+                            <div class="flex items-center justify-center h-full text-gray-400">
+                                <i class="fa-solid fa-chart-bar text-4xl"></i>
+                                <p class="ml-2">知识库活跃度图表加载中...</p>
+                            </div>
+                        </div>
+                        <div class="h-80">
+                            <!-- 图表将在这里渲染 -->
+                            <div class="flex items-center justify-center h-full text-gray-400">
+                                <i class="fa-solid fa-pie-chart text-4xl"></i>
+                                <p class="ml-2">文档类型分布图表加载中...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 文档管理中心页面 -->
+            <div id="document-management-page" class="hidden space-y-6">
+                <div class="bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                        <div>
+                            <h2 class="font-bold text-xl">文档管理中心</h2>
+                            <p class="text-gray-400 text-sm">管理和组织您的所有文档，支持分类和搜索</p>
+                        </div>
+                        <div class="mt-4 md:mt-0 flex items-center space-x-3">
+                            <div class="relative">
+                                <input type="text" placeholder="搜索文档..." class="pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors w-full md:w-64">
+                                <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            </div>
+                            <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors shadow-sm hover:shadow flex items-center space-x-2">
+                                <i class="fa-solid fa-upload"></i>
+                                <span>上传文档</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">文档名称</th>
+                                    <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">知识库</th>
+                                    <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">大小</th>
+                                    <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">上传时间</th>
+                                    <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                    <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 rounded bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
+                                                <i class="fa-solid fa-file-pdf"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium">产品使用手册.pdf</div>
+                                                <div class="text-xs text-gray-400">默认知识库</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs bg-primary/10 text-primary rounded">默认知识库</span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">2.4 MB</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">2023-06-15 14:30</td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            已处理
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <div class="flex space-x-2">
+                                            <button class="text-primary hover:text-primary/80 transition-colors">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button class="text-gray-500 hover:text-gray-700 transition-colors">
+                                                <i class="fa-solid fa-download"></i>
+                                            </button>
+                                            <button class="text-gray-500 hover:text-gray-700 transition-colors">
+                                                <i class="fa-solid fa-ellipsis-v"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 rounded bg-indigo-100 flex items-center justify-center text-indigo-600 mr-3">
+                                                <i class="fa-solid fa-file-word"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium">技术规格说明书.docx</div>
+                                                <div class="text-xs text-gray-400">技术文档</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs bg-secondary/10 text-secondary rounded">技术文档</span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">1.8 MB</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">2023-06-14 09:15</td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            已处理
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <div class="flex space-x-2">
+                                            <button class="text-primary hover:text-primary/80 transition-colors">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button class="text-gray-500 hover:text-gray-700 transition-colors">
+                                                <i class="fa-solid fa-download"></i>
+                                            </button>
+                                            <button class="text-gray-500 hover:text-gray-700 transition-colors">
+                                                <i class="fa-solid fa-ellipsis-v"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 rounded bg-yellow-100 flex items-center justify-center text-yellow-600 mr-3">
+                                                <i class="fa-solid fa-file-excel"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium">销售数据统计.xlsx</div>
+                                                <div class="text-xs text-gray-400">营销材料</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs bg-warning/10 text-warning rounded">营销材料</span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">3.2 MB</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">2023-06-13 16:45</td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                            处理中
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <div class="flex space-x-2">
+                                            <button class="text-primary hover:text-primary/80 transition-colors">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button class="text-gray-500 hover:text-gray-700 transition-colors">
+                                                <i class="fa-solid fa-download"></i>
+                                            </button>
+                                            <button class="text-gray-500 hover:text-gray-700 transition-colors">
+                                                <i class="fa-solid fa-ellipsis-v"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 rounded bg-gray-100 flex items-center justify-center text-gray-600 mr-3">
+                                                <i class="fa-solid fa-file-text"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium">会议记录.txt</div>
+                                                <div class="text-xs text-gray-400">默认知识库</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs bg-primary/10 text-primary rounded">默认知识库</span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">0.5 MB</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">2023-06-12 11:20</td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                            失败
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <div class="flex space-x-2">
+                                            <button class="text-primary hover:text-primary/80 transition-colors">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button class="text-gray-500 hover:text-gray-700 transition-colors">
+                                                <i class="fa-solid fa-refresh"></i>
+                                            </button>
+                                            <button class="text-gray-500 hover:text-gray-700 transition-colors">
+                                                <i class="fa-solid fa-ellipsis-v"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mt-6">
+                        <div class="text-sm text-gray-500">
+                            显示 1 到 4 条，共 156 条
+                        </div>
+                        <div class="flex space-x-1">
+                            <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                <i class="fa-solid fa-chevron-left text-xs"></i>
+                            </button>
+                            <button class="px-3 py-1 border border-primary bg-primary text-white rounded-md">1</button>
+                            <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50">2</button>
+                            <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50">3</button>
+                            <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50">
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="font-bold text-xl">文档分析</h2>
+                        <button class="text-primary hover:text-primary/80 transition-colors">
+                            <i class="fa-solid fa-download"></i>
+                            <span class="ml-1 text-sm">导出报告</span>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="h-60">
+                            <!-- 图表将在这里渲染 -->
+                            <div class="flex items-center justify-center h-full text-gray-400">
+                                <i class="fa-solid fa-pie-chart text-3xl"></i>
+                                <p class="ml-2">文档类型分布</p>
+                            </div>
+                        </div>
+                        <div class="h-60">
+                            <!-- 图表将在这里渲染 -->
+                            <div class="flex items-center justify-center h-full text-gray-400">
+                                <i class="fa-solid fa-chart-line text-3xl"></i>
+                                <p class="ml-2">上传趋势</p>
+                            </div>
+                        </div>
+                        <div class="h-60">
+                            <!-- 图表将在这里渲染 -->
+                            <div class="flex items-center justify-center h-full text-gray-400">
+                                <i class="fa-solid fa-chart-bar text-3xl"></i>
+                                <p class="ml-2">知识库分布</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 上传历史页面 -->
+            <div id="upload-history-page" class="hidden space-y-6">
+                <div class="bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                        <div>
+                            <h2 class="font-bold text-xl">上传结果列表</h2>
+                            <p class="text-gray-400 text-sm">查看所有上传任务的状态和结果</p>
+                        </div>
+                        <div class="mt-4 md:mt-0 flex items-center space-x-3">
+                            <div class="relative">
+                                <input type="text" placeholder="搜索上传记录..." class="pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors w-full md:w-64">
+                                <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            </div>
+                            <div class="relative">
+                                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors appearance-none pr-8">
+                                    <option>全部状态</option>
+                                    <option>成功</option>
+                                    <option>处理中</option>
+                                    <option>失败</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                                    <i class="fa-solid fa-chevron-down text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">上传任务</th>
+                                    <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">知识库</th>
+                                    <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">文件数量</th>
+                                    <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">开始时间</th>
+                                    <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">完成时间</th>
+                                    <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                    <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 rounded bg-primary/10 flex items-center justify-center text-primary mr-3">
+                                                <i class="fa-solid fa-upload"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium">产品文档更新</div>
+                                                <div class="text-xs text-gray-400">管理员</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs bg-primary/10 text-primary rounded">默认知识库</span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">5</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">2023-06-15 14:30</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">2023-06-15 14:45</td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            成功
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <div class="flex space-x-2">
+                                            <button class="text-primary hover:text-primary/80 transition-colors">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button class="text-gray-500 hover:text-gray-700 transition-colors">
+                                                <i class="fa-solid fa-download"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 rounded bg-secondary/10 flex items-center justify-center text-secondary mr-3">
+                                                <i class="fa-solid fa-upload"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium">技术文档上传</div>
+                                                <div class="text-xs text-gray-400">管理员</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs bg-secondary/10 text-secondary rounded">技术文档</span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">3</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">2023-06-14 09:15</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">2023-06-14 09:30</td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            成功
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <div class="flex space-x-2">
+                                            <button class="text-primary hover:text-primary/80 transition-colors">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button class="text-gray-500 hover:text-gray-700 transition-colors">
+                                                <i class="fa-solid fa-download"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 rounded bg-warning/10 flex items-center justify-center text-warning mr-3">
+                                                <i class="fa-solid fa-upload"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium">营销数据导入</div>
+                                                <div class="text-xs text-gray-400">市场部</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs bg-warning/10 text-warning rounded">营销材料</span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">2</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">2023-06-13 16:45</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">--</td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                            处理中
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <div class="flex space-x-2">
+                                            <button class="text-primary hover:text-primary/80 transition-colors">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button class="text-gray-500 hover:text-gray-700 transition-colors">
+                                                <i class="fa-solid fa-pause"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 rounded bg-danger/10 flex items-center justify-center text-danger mr-3">
+                                                <i class="fa-solid fa-upload"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium">常见问题更新</div>
+                                                <div class="text-xs text-gray-400">客服部</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs bg-danger/10 text-danger rounded">常见问题</span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">8</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">2023-06-12 11:20</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">2023-06-12 11:35</td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                            失败
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <div class="flex space-x-2">
+                                            <button class="text-primary hover:text-primary/80 transition-colors">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button class="text-gray-500 hover:text-gray-700 transition-colors">
+                                                <i class="fa-solid fa-refresh"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mt-6">
+                        <div class="text-sm text-gray-500">
+                            显示 1 到 4 条，共 28 条
+                        </div>
+                        <div class="flex space-x-1">
+                            <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                <i class="fa-solid fa-chevron-left text-xs"></i>
+                            </button>
+                            <button class="px-3 py-1 border border-primary bg-primary text-white rounded-md">1</button>
+                            <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50">2</button>
+                            <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50">3</button>
+                            <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50">
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="font-bold text-xl">上传统计</h2>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 text-xs rounded-lg bg-primary/10 text-primary">周</button>
+                                <button class="px-3 py-1 text-xs rounded-lg hover:bg-gray-100 text-gray-500">月</button>
+                                <button class="px-3 py-1 text-xs rounded-lg hover:bg-gray-100 text-gray-500">年</button>
+                            </div>
+                        </div>
+                        <div class="h-60">
+                            <!-- 图表将在这里渲染 -->
+                            <div class="flex items-center justify-center h-full text-gray-400">
+                                <i class="fa-solid fa-chart-line text-3xl"></i>
+                                <p class="ml-2">上传成功率图表加载中...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="font-bold text-xl">最近上传问题</h2>
+                            <a href="#" class="text-primary text-sm hover:text-primary/80 transition-colors">查看全部</a>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="p-3 bg-red-50 rounded-lg border border-red-100">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="text-sm font-medium text-red-800">文件格式不支持</h3>
+                                        <p class="text-xs text-red-600 mt-1">常见问题更新 - 客服部</p
